@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify OTP / X</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://googleapis.com');
+    body { font-family: 'Inter', sans-serif; }
+    /* Hide arrows on number input */
+    input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  </style>
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col antialiased">
+
+  <!-- Top Navigation Bar -->
+  <header class="flex items-center px-4 py-3 sticky top-0 bg-black/80 backdrop-blur-md z-50">
+    <div class="flex-1 flex justify-center">
+      <svg viewBox="0 0 24 24" class="h-8 w-8 fill-white">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+      </svg>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center justify-start pt-12 px-6">
+    <div class="w-full max-w-[364px] flex flex-col">
+
+      <h1 class="text-[31px] font-bold mb-3 tracking-tight">Enter verification code</h1>
+      <p class="text-[#71767b] text-[15px] mb-8 leading-5">
+        We sent a 6-digit code to your email. Enter it below to verify your identity.
+      </p>
+
+      <form id="verifyForm" class="flex flex-col gap-6">
+        <!-- OTP Input with Floating Label -->
+        <div class="relative w-full border border-gray-800 rounded-[4px] focus-within:ring-1 focus-within:ring-[#1d9bf0] focus-within:border-[#1d9bf0] transition-shadow group">
+          <input type="number" maxlength="6" id="otpInput" name="otp" required
+            class="w-full bg-black px-3 pt-6 pb-2 text-white text-[17px] focus:outline-none peer placeholder-transparent tracking-[0.5em]"
+            placeholder="Verification code">
+          <label for="otpInput" class="absolute left-3 top-4 text-[#71767b] text-[17px] transition-all pointer-events-none
+                        peer-placeholder-shown:top-4 peer-placeholder-shown:text-[17px] 
+                        peer-focus:top-1.5 peer-focus:text-[13px] peer-focus:text-[#1d9bf0]
+                        peer-not-placeholder-shown:top-1.5 peer-not-placeholder-shown:text-[13px]">
+            Verification code
+          </label>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col gap-3 mt-4">
+            <button type="button" id="verifyBtn"
+                class="w-full bg-white text-black font-bold py-2.5 rounded-full hover:bg-[#d7dbdc] active:scale-[0.98] transition-all duration-200">
+                Next
+            </button>
+            
+            <button type="button" class="w-full text-center text-[#1d9bf0] text-[14px] hover:underline bg-transparent py-2">
+                Didn't receive a code?
+            </button>
+        </div>
+      </form>
+    </div>
+  </main>
+<script>
+
+    const resetToken = "<%= token %>";
+
+    async function getOTP() {
+
+        const res = await fetch(`/api/auth/get-otp/${resetToken}`, {
+            method: "GET",
+        })
+
+
+        const respData = await res.json();
+
+        if (respData.error) {
+            alert(respData.error);
+        }
+
+        else {
+
+            const expiryTime = new Date(`${respData.data.expiry_time}`).getTime();
+            const currentTime = new Date().getTime();
+
+            const diffInSeconds = Math.floor((expiryTime - currentTime) / 1000);
+
+            const timer = document.getElementById("timer")
+
+            setInterval(() => {
+                const currentT = new Date().getTime();
+                timer.innerText = Math.floor((expiryTime - currentTime) / 1000);
+
+            }, 1000)
+
+        }
+
+
+
+    }
+    getOTP();
+
+
+
+</script>
+
+
+</html>

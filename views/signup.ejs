@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign up for X</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Toastify CSS & JS -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net"></script>
+  <style>
+    @import url('https://googleapis.com');
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-black text-white min-h-screen flex items-center justify-center p-5">
+
+    <div class="w-full max-w-[1200px] flex flex-col lg:flex-row items-center justify-around gap-10">
+        <!-- Left Logo (Hidden on mobile/tablet like your original CSS) -->
+        <div class="hidden lg:flex flex-1 justify-center">
+            <svg viewBox="0 0 24 24" class="h-[320px] fill-white">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+            </svg>
+        </div>
+
+        <!-- Right Content -->
+        <div class="flex-1 max-w-[600px] w-full p-5">
+            <h1 class="text-4xl lg:text-[64px] font-extrabold mb-10 tracking-tighter leading-tight">Happening now</h1>
+            <h2 class="text-2xl lg:text-[31px] font-extrabold mb-8">Join today.</h2>
+
+            <form id="signupForm" class="flex flex-col gap-4 max-w-[300px]">
+                <input type="text" name="username" placeholder="Username" required 
+                    class="bg-transparent border border-gray-800 rounded-md p-4 text-base focus:outline-none focus:border-[#1d9bf0] transition-colors">
+                
+                <input type="email" name="email" placeholder="Email" required 
+                    class="bg-transparent border border-gray-800 rounded-md p-4 text-base focus:outline-none focus:border-[#1d9bf0] transition-colors">
+                
+                <input type="password" name="password" placeholder="Password" required 
+                    class="bg-transparent border border-gray-800 rounded-md p-4 text-base focus:outline-none focus:border-[#1d9bf0] transition-colors">
+                
+                <input type="text" name="f_name" placeholder="First name" required 
+                    class="bg-transparent border border-gray-800 rounded-md p-4 text-base focus:outline-none focus:border-[#1d9bf0] transition-colors">
+                
+                <input type="text" name="l_name" placeholder="Last name" required 
+                    class="bg-transparent border border-gray-800 rounded-md p-4 text-base focus:outline-none focus:border-[#1d9bf0] transition-colors">
+                    
+                
+                <input type="date" name="dob" placeholder="dob" required 
+                    class="bg-transparent border border-gray-800 rounded-md p-4 text-base focus:outline-none focus:border-[#1d9bf0] transition-colors [color-scheme:dark]">
+                
+                <button type="button" id="btn" class="bg-[#eff3f4] text-black font-bold py-2.5 rounded-full text-[15px] hover:bg-[#d7dbdc] transition-colors mt-2">
+                    Create account
+                </button>
+                
+                <p class="text-[11px] text-gray-500 leading-normal">
+                    By signing up, you agree to the <span class="text-[#1d9bf0] cursor-pointer">Terms of Service</span> and <span class="text-[#1d9bf0] cursor-pointer">Privacy Policy</span>, including <span class="text-[#1d9bf0] cursor-pointer">Cookie Use.</span>
+                </p>
+            </form>
+
+            <div class="mt-10 max-w-[300px]">
+                <p class="font-bold mb-4">Already have an account?</p>
+                <a href="/login"><button id="signinBtn" type="button" class="w-full border border-gray-600 text-[#1d9bf0] font-bold py-2 rounded-full text-[15px] hover:bg-[#1d9bf0]/10 transition-colors">
+                    Sign in
+                </button></a>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+
+    <script>
+
+  const form = document.getElementById("signupForm")
+
+  const submitBtn = document.getElementById("btn");
+
+  submitBtn.addEventListener("click",signUp)
+
+  async function signUp(e){
+    
+    const data = new FormData(form)
+        const values = Object.fromEntries(data.entries())
+        console.log(data)
+        console.log(values);
+
+        if(!validateForm()){
+          e.preventDefault();
+          console.log("prevented form submission")
+          return;
+        }
+
+
+        const res = await fetch("/api/auth/signup",{
+          method:"POST",
+           headers: {
+                "Content-Type": "application/json"
+            },
+          body : JSON.stringify(values)
+        })
+
+        console.log(res,"response")
+
+        const data1 = await res.json()
+
+        if(data1.error){
+          alert(data1.error)
+        }
+        else{
+          alert("account created successfully")
+
+       window.location.href = "/login"
+        }
+       
+
+
+  }
+
+  function validateForm(){
+    return true;
+  }
+
+
+ 
+
+
+
+
+</script>
+</html>

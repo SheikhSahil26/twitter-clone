@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width='device-width', initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    this is email page
+    <h1 id="otp"></h1>
+</body>
+<script>
+
+    const resetToken = "<%= token %>";
+
+    async function getOTP() {
+
+        const res = await fetch(`/api/auth/get-otp/${resetToken}`, {
+            method: "GET",
+        })
+
+
+        const respData = await res.json();
+
+        if (respData.error) {
+            alert(respData.error);
+        }
+
+        else {
+            const otpEle = document.getElementById("otp")
+            console.log(respData.data)
+            otpEle.innerText = respData.data.otp
+            const expiryTime = new Date(`${respData.data.expiry_time}`).getTime();
+            const currentTime = new Date().getTime();
+
+            // Difference in seconds
+            const diffInSeconds = Math.floor((expiryTime - currentTime) / 1000);
+
+            console.log(diffInSeconds);
+
+        }
+
+
+
+    }
+    getOTP();
+
+
+</script>
+
+</html>

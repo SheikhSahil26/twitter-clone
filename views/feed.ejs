@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>X Home / X</title>
+    <style>
+        @import url('https://cdn.googleapis.com');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="bg-black text-white selection:bg-blue-500/30">
+    <div class="flex max-w-7xl mx-auto min-h-screen">
+
+        <!-- LEFT SIDEBAR: Navigation -->
+        <aside class="w-20 xl:w-64 flex flex-col sticky top-0 h-screen px-2 border-r border-gray-800">
+            <div class="p-3 mb-2">
+                <svg viewBox="0 0 24 24" class="h-8 w-8 fill-white">
+                    <path
+                        d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z">
+                    </path>
+                </svg>
+            </div>
+
+            <nav class="space-y-1">
+                <a href="#"
+                    class="flex items-center gap-4 p-3 rounded-full hover:bg-white/10 transition w-fit xl:w-full">
+                    <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M12 9c-2.209 0-4 1.791-4 4s1.791 4 4 4 4-1.791 4-4-1.791-4-4-4zm0 6c-1.103 0-2-.897-2-2s.897-2 2-2 2 .897 2 2-.897 2-2 2z" />
+                        <path
+                            d="M20 10V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2zM6 7h12v3H6V7zM4 13v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4H4zm2 4v-2h12v2H6z" />
+                    </svg>
+                    <span class="text-xl font-bold hidden xl:block">Home</span>
+                </a>
+                <a href="/feed"
+                    class="flex items-center gap-4 p-3 rounded-full hover:bg-white/10 transition w-fit xl:w-full">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <span class="text-xl hidden xl:block">Explore</span>
+                </a>
+                <a href="#"
+                    class="flex items-center gap-4 p-3 rounded-full hover:bg-white/10 transition w-fit xl:w-full">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path
+                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+                        </path>
+                    </svg>
+                    <span class="text-xl hidden xl:block">Notifications</span>
+                </a>
+                <a href="/profile"
+                    class="flex items-center gap-4 p-3 rounded-full hover:bg-white/10 transition w-fit xl:w-full">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path
+                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+                        </path>
+                    </svg>
+                    <span class="text-xl hidden xl:block">Profile</span>
+                </a>
+            </nav>
+
+            <!-- Post buttons (wired to modal) -->
+            <button id="post-btn-large"
+                class="bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white font-bold py-3 mt-4 rounded-full w-full hidden xl:block">Post</button>
+            <button id="post-btn-small" class="bg-[#1d9bf0] p-3 mt-4 rounded-full xl:hidden"><svg
+                    class="w-6 h-6 fill-white" viewBox="0 0 24 24">
+                    <path d="M23 3l-6.62 6.62L3 3l6.62 6.62L3 21l6.62-6.62L21 21l-6.62-6.62L23 3z" />
+                </svg></button>
+
+            <!-- Profile Section -->
+           
+
+        </aside>
+
+        <!-- CENTER FEED: Main content -->
+        <main class="flex-1 max-w-[600px] border-r border-gray-800">
+            <!-- Tabs -->
+            <header class="sticky top-0 bg-black/80 backdrop-blur-md border-b border-gray-800 z-40">
+                <div class="flex">
+                    <div
+                        class="flex-1 flex flex-col items-center justify-center hover:bg-white/10 cursor-pointer transition">
+                        <span class="py-4 font-bold relative">For you <div
+                                class="absolute bottom-0 h-1 w-full bg-[#1d9bf0] rounded-full"></div></span>
+                    </div>
+                    <div
+                        class="flex-1 text-center py-4 text-gray-500 font-medium hover:bg-white/10 cursor-pointer transition">
+                        Following</div>
+                </div>
+            </header>
+
+            <!-- Post Input Area -->
+            <div class="flex gap-4 p-4 border-b border-gray-800">
+                <img src="https://dicebear.com" class="w-10 h-10 rounded-full bg-gray-700">
+                <div class="flex-1">
+                    <textarea id="inline-text"
+                        class="w-full bg-transparent text-xl placeholder-gray-500 focus:outline-none resize-none"
+                        placeholder="What is happening?!" rows="2"></textarea>
+                    <div class="text-[#1d9bf0] text-sm font-bold flex items-center gap-1 mb-3">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                            <path
+                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
+                        </svg> Everyone can reply
+                    </div>
+                    <div class="flex items-center justify-between border-t border-gray-800 pt-3">
+                        <div class="flex text-[#1d9bf0] gap-4">
+                            <span>🖼️</span><span>📊</span><span>😀</span><span>📅</span><span>📍</span>
+                        </div>
+                        <button id="inline-post"
+                            class="bg-[#1d9bf0] opacity-50 px-4 py-1.5 rounded-full font-bold">Post</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feed Post -->
+            <div id="feed-container">
+
+            </div>
+        </main>
+
+        <!-- RIGHT SIDEBAR: Trends -->
+        <aside class="hidden lg:block w-[350px] p-4 space-y-4">
+            <!-- Search -->
+            <div class="relative sticky top-2 z-50">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <input
+                    class="w-full bg-[#202327] rounded-full py-3 pl-12 pr-4 focus:outline-none focus:ring-1 focus:ring-[#1d9bf0] focus:bg-black"
+                    placeholder="Search">
+            </div>
+            <div id="follow-suggestion">
+                <h3>suggested</h3>
+
+
+            </div>
+
+
+            <!-- Subscribe Card -->
+            <section class="bg-[#16181c] rounded-2xl p-4 border border-gray-800">
+                <h2  class="text-xl font-extrabold mb-2">Subscribe to Premium</h2>
+                <p class="text-[15px] font-medium leading-5 mb-3">Subscribe to unlock new features and if eligible,
+                    receive a share of revenue.</p>
+                <button id="subscribeBtn" class="bg-[#1d9bf0] text-white font-bold px-4 py-1.5 rounded-full">Subscribe</button>
+            </section>
+
+            <!-- Trends Section -->
+            <section class="bg-[#16181c] rounded-2xl border border-gray-800 overflow-hidden">
+                <h2 class="text-xl font-extrabold px-4 py-3">Whats Happening</h2>
+
+                <div class="px-4 py-3 hover:bg-white/5 cursor-pointer transition">
+                    <p class="text-xs text-gray-500">Trending in India</p>
+                    <p class="font-bold">#JagannathRathyatra</p>
+                    <p class="text-xs text-gray-500">48.9k posts</p>
+                </div>
+
+                <div class="px-4 py-3 hover:bg-white/5 cursor-pointer transition">
+                    <p class="text-xs text-gray-500">Sports · Trending</p>
+                    <p class="font-bold">#Thala</p>
+                    <p class="text-xs text-gray-500">9,310 posts</p>
+                </div>
+
+                <div class="px-4 py-3 hover:bg-white/5 cursor-pointer transition text-[#1d9bf0]">
+                    Show more
+                </div>
+            </section>
+
+        </aside>
+
+    </div>
+
+    <!-- Modal (hidden by default) -->
+    <div id="post-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 px-4">
+        <div class="bg-[#0f1113] w-full max-w-lg rounded-2xl p-4 border border-gray-800">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-xl font-bold">Create post</h3>
+                <button id="modal-close" class="text-gray-400 hover:text-white text-lg">✕</button>
+            </div>
+
+            <form id="postForm" enctype="multipart/form-data">
+                <div class="flex gap-4 mb-3">
+                    <img src="https://dicebear.com" class="w-12 h-12 rounded-full bg-gray-700">
+                    <input id="modal-text" type="text" name="tweet_content"
+                        class="w-full bg-transparent text-lg placeholder-gray-500 focus:outline-none resize-none"
+                        rows="4" placeholder="What is happening?!"></input>
+                </div>
+
+                <div class="mb-4">
+                    <label class="flex items-center gap-3 cursor-pointer text-[#1d9bf0]">
+                        <input id="modal-file" name="media" type="file" accept="image/\*,video/\*" class="hidden">
+                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                            <path d="M4 4h16v16H4z" />
+                        </svg>
+                        <span class="font-medium">Add media</span>
+                    </label>
+                    <div id="file-name" class="text-sm text-gray-400 mt-2"></div>
+                    <div id="file-preview" class="mt-3"></div>
+                </div>
+
+                <div class="flex items-center justify-end gap-3">
+                    <button id="modal-cancel" class="px-4 py-1.5 rounded-full hover:bg-white/5">Cancel</button>
+                    <button id="modal-submit" type="button"
+                        class="bg-[#1d9bf0] px-4 py-1.5 rounded-full font-bold">Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+</body>
+
+<script>
+    const feedContainer = document.getElementById("feed-container")
+
+    async function getUserFeed() {
+
+        const res = await fetch("/api/user/user-feed", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "authorization": `Bearer ${localStorage.getItem("accessToken")}`
+            }
+        })
+
+
+        const data = await res.json();
+
+        if (data.error) {
+            alert(data.error);
+            window.location.href = "/login"
+        }
+
+        console.log(data.feed, "user feed")
+
+
+
+
+
+
+        for (let i = 0; i < data.feed.length; i++) {
+            let tweet = data.feed[i];
+            const mediaHtml = tweet.media && tweet.media.length > 0
+                ? tweet.media.map(item => `
+            <img src="${item}" class="w-full h-auto object-cover border-b border-gray-800 last:border-b-0">
+          `).join('')
+                : '';
+
+            console.log(mediaHtml, "this is media html")
+
+
+            let feedDiv = document.createElement("div")
+            let feedContent = `<article class="p-4 border-b border-gray-800 hover:bg-white/5 transition cursor-pointer">
+                <div class="flex gap-3">
+                   <a href="/profile/${data.feed[i].username}"> <img src="${data.feed[i].profile_photo_url}" class="w-10 h-10 rounded-full bg-gray-700"></a>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-1">
+                            <a href="/profile/${data.feed[i].username}"><span class="font-bold hover:underline">${data.feed[i].username}</span></a>
+                            <span class="text-gray-500">@${data.feed[i].username}· 6h</span>
+                        </div>
+                        <a href="/tweet/${data.feed[i].tweet_id}">
+                        <p class="mt-1 mb-3">${data.feed[i].tweet_content}</p>
+                        <div class="rounded-2xl border border-gray-800 overflow-hidden">
+                            <div class="rounded-2xl border border-gray-800 overflow-hidden flex flex-col">
+                        ${mediaHtml}
+                    </div>
+                        </div>
+                        </a>
+                        <!-- Post Actions -->
+                        <div class="flex justify-between mt-4 text-gray-500 max-w-md">
+                            <div class="flex items-center gap-2 group"><span onclick="replyToTweet(${tweet.tweet_id})" class="p-2 rounded-full group-hover:bg-blue-500/10 group-hover:text-blue-500">💬</span> ${data.feed[i].reply_count}</div>
+                            <div class="flex items-center gap-2 group"><span onclick="retweet(${tweet.tweet_id})" class="p-2 rounded-full group-hover:bg-green-500/10 group-hover:text-green-500">🔁</span> ${data.feed[i].retweet_count}</div>
+                            <div class="flex items-center gap-2 group"><span onclick="likeTweet(${tweet.tweet_id})" class="p-2 rounded-full group-hover:bg-pink-500/10 group-hover:text-pink-500">❤️</span> ${data.feed[i].like_count}</div>
+                            <div class="flex items-center gap-2 group"><span class="p-2 rounded-full group-hover:bg-blue-500/10 group-hover:text-blue-500">📊</span> 418k</div>
+                        </div>
+                    </div>
+                </div>
+            </article>`
+            feedDiv.innerHTML = feedContent
+            feedContainer.append(feedDiv)
+        }
+
+
+
+
+    }
+
+    getUserFeed();
+
+    const postBtnLarge = document.getElementById('post-btn-large');
+    const postBtnSmall = document.getElementById('post-btn-small');
+    const modal = document.getElementById('post-modal');
+    const modalClose = document.getElementById('modal-close');
+    const modalCancel = document.getElementById('modal-cancel');
+    const modalSubmit = document.getElementById('modal-submit');
+    const modalFile = document.getElementById('modal-file');
+    const fileName = document.getElementById('file-name');
+    const filePreview = document.getElementById('file-preview');
+    const modalText = document.getElementById('modal-text');
+    const inlinePost = document.getElementById('inline-post');
+    const inlineText = document.getElementById('inline-text');
+
+    function openModal() {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        modalText.focus();
+    }
+    function closeModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        modalText.value = '';
+        modalFile.value = '';
+        fileName.textContent = '';
+        filePreview.innerHTML = '';
+    }
+
+    [postBtnLarge, postBtnSmall].forEach(b => { if (b) b.addEventListener('click', openModal); });
+    [modalClose, modalCancel].forEach(b => { if (b) b.addEventListener('click', closeModal); });
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    modalFile.addEventListener('change', (e) => {
+        const f = e.target.files[0];
+        fileName.textContent = f ? `${f.name} • ${Math.round(f.size / 1024)} KB` : '';
+        filePreview.innerHTML = '';
+        if (!f) return;
+        if (f.type.startsWith('image/')) {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(f);
+            img.className = 'max-h-48 rounded mt-2';
+            img.onload = () => URL.revokeObjectURL(img.src);
+            filePreview.appendChild(img);
+        } else if (f.type.startsWith('video/')) {
+            const vid = document.createElement('video');
+            vid.src = URL.createObjectURL(f);
+            vid.controls = true;
+            vid.className = 'max-h-48 rounded mt-2';
+            filePreview.appendChild(vid);
+        } else {
+            const p = document.createElement('p');
+            p.textContent = 'Preview not available for this file type.';
+            filePreview.appendChild(p);
+        }
+    });
+
+
+    //   addPostToFeed({text, file});
+    // TODO: upload file + send to server
+
+
+
+    // 2. Append your data
+    // 'tweetImage' and 'content' are the keys your backend will 
+    const postBtn = document.getElementById("modal-submit")
+    postBtn.addEventListener("click", createTweet)
+
+
+    async function createTweet() {
+        const postForm = document.getElementById("postForm");
+        const formData = new FormData(postForm);
+
+        // LOGGING: Use this to verify data is there (files won't show in regular console.log)
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
+
+        const res = await fetch("/api/tweet/create-tweet", {
+            method: "POST",
+            headers: {
+                // ONLY put headers here. DO NOT set Content-Type.
+                "authorization": `Bearer ${localStorage.getItem("accessToken")}`
+            },
+            // The body goes OUTSIDE the headers
+            body: formData
+        });
+
+        const data = await res.json();
+        console.log(data, "tweet created data");
+    }
+
+
+
+
+    // Allow quick post from inline input (without file)
+    inlinePost.addEventListener('click', () => {
+        const text = (inlineText.value || '').trim();
+        if (!text) return;
+        addPostToFeed({ text, file: null });
+        inlineText.value = '';
+    });
+
+
+    async function getAllUsers() {
+        const res = await fetch(`/api/user/get-all-users`, {
+            method: "GET",
+            headers: {
+                authorization: `Bearer ${localStorage.getItem("accessToken")}`
+            }
+        })
+
+        const data = await res.json();
+        console.log(data, "user suggestions")
+
+        const suggestion = document.getElementById("follow-suggestion");
+
+        let allUsers = data.allUsers
+
+        for (let i = 0; i < allUsers.length; i++) {
+            let suggestedDiv = document.createElement("div")
+            const suggestedUser = `
+              <div class="mt-auto mb-4 flex items-center gap-3 p-3 rounded-full hover:bg-white/10 cursor-pointer">
+          <a href="/profile/${allUsers[i].username}">
+          
+            <img src="${allUsers[i].profile_photo_url}" class="w-10 h-10 rounded-full bg-gray-700">
+            <div class="hidden xl:block">
+                <p class="font-bold text-[15px]">${allUsers[i].username}</p>
+                <p class="text-gray-500 text-[15px]">@${allUsers[i].username}</p>
+            </div>
+            </a>
+            <div class="ml-auto hidden xl:block"><button type="button" id="follow-btn-${i}" onclick="followUnfollow('${allUsers[i].username}',${i})">follow</button></div>
+        </div>
+         
+        `
+            suggestedDiv.innerHTML = suggestedUser
+            suggestion.append(suggestedDiv)
+
+        }
+    }
+
+    getAllUsers();
+
+    async function followUnfollow(username,idx){
+        console.log(username)
+      const res = await fetch(`/api/user/follow-unfollow-user/${username}`, {
+            method: "POST",
+            headers: {
+                authorization: `Bearer ${localStorage.getItem("accessToken")}`
+            }
+        })
+
+        const followBtn = document.getElementById(`follow-btn-${idx}`)
+
+        const data = await res.json();
+        console.log(data, "follow unfollow status")
+
+        if(data.message==="followed user"){
+            followBtn.innerText = "unfollow"
+        }
+        else if(data.message==="unfollowed user"){
+            followBtn.innerText = "follow"
+        }
+
+
+
+
+    }
+
+
+
+ async function likeTweet(tweetId){
+            console.log(tweetId)
+            const res = await fetch(`/api/tweet/like-unlike-tweet/${tweetId}`,{
+                method:"POST",
+                headers:{
+                    authorization:`Bearer ${localStorage.getItem("accessToken")}`
+                },
+               
+            })
+
+
+            const data = await res.json();
+
+            console.log(data,"liked unliked data!!!")
+
+
+        }
+
+
+
+
+
+    let subscribeBtn = document.getElementById("subscribeBtn")
+
+    subscribeBtn.addEventListener("click",()=>{
+        alert("lawde tera ghar jainga isme!!!")
+    })
+
+</script>
+
+
+
+
+
+
+</html>
