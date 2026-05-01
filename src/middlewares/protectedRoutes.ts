@@ -8,15 +8,15 @@ export async function protectedRoutes(req: Request, res: Response, next: NextFun
     const authHeader:any = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ error: "Unauthorized: Missing or malformed header" });
+        return res.status(401).json({ error: "Unauthorized" });
     }
 
-    // Replace any potential extra quotes if they exist from localStorage mishaps
+    
     const token = authHeader.split(" ")[1].replace(/^["'](.+)["']$/, '$1');
 
     if (!JWT_SECRET_KEY) {
         console.error("JWT_SECRET_KEY is missing in environment variables!");
-        return res.status(500).json({ error: "Internal server configuration error" });
+        return res.status(500).json({ error: "Internal server error" });
     }
 
     try {

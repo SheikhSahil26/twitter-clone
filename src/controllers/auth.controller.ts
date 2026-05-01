@@ -76,8 +76,8 @@ export class AuthControllers {
     async forgotPassword(req: any, res: Response) {
         try {
             console.log(req.body,"email")
-        const response = await authService.forgotPassword(req.body.email);
-        console.log(req.body.email)
+            const response:any = await authService.forgotPassword(req.body.email);
+            console.log(req.body.email)
 
         if (!response.success) {
             return res.status(response.statusCode || 500).json({
@@ -88,7 +88,8 @@ export class AuthControllers {
         return res.status(200).json({
             success: true,
             message: response.message,
-            data: response.data
+            data: response.data,
+            statusCode:response.statusCode,
         });
 
     } catch (err) {
@@ -125,6 +126,7 @@ export class AuthControllers {
 
     async verifyOtp(req:Request,res:Response){
         try{
+            console.log(req.body,"body inside otp controller")
             const resp= await authService.verifyOtp(req.body.otp,req.body.token);
 
             if(!resp.success){
@@ -144,8 +146,8 @@ export class AuthControllers {
 
             return res.status(200).json({
                 success:true,
-                message : resp.data,
-                data:resp.data,
+                message :"link shared successfully",
+                token:resp.data,
             })
 
 
@@ -157,32 +159,55 @@ export class AuthControllers {
         }
     }
 
+    async verifyToken(req:Request,res:Response){
+        try{
+            const token = req.params.token as string
+            const resp = await authService.verifyToken(token)
+
+            if(!resp.success){
+                return res.status(resp.statusCode).json({
+                    error:resp.message
+                })
+                   
+            }
+
+            return res.status(resp.statusCode).json({
+                message:resp.message
+            })
+
+
+
+        }catch(err){
+            return res.status(500).json({
+                error:"internal server error"
+            })
+        }
+    }
+
 
     async resetPassword(req: any, res: any) {
         try {
 
             const newPassword = req.body.password
             // const token = req.body.token
-            const id = req.body.id;
+            const id = req.body.token;
+
+            console.log(req.body)
 
 
             const resp = await authService.resetPassword(newPassword, id)
 
             if(!resp.success){
-                if(resp.statusCode===400){
-                    return res.status(400).json({
+                     return res.status(400).json({
                         error:resp.error
                     })
-                }
-                else{
-                    return res.status(500).json({
-                        error:resp.error,
-                    })
-                }
+         
+                   
+             
             }
 
             return res.status(resp.statusCode).json({
-                success:"password updated successfully",
+              message:resp.message
                
             })
 

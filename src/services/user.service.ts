@@ -11,6 +11,7 @@ import crypto from "crypto";
 import { success } from "zod";
 import { generateOTP } from "../utils/generateOTP.js";
 import { mapUpdateFields } from "../mappers/user.mapper.js";
+import { measureMemory } from "vm";
 
 
 type ServiceResponse<T> = {
@@ -53,9 +54,9 @@ export class UserService {
 
     }
 
-    async getUserTweetsByUsername(username:string){
-        
-        
+    async getUserTweetsByUsername(username: string) {
+
+
 
 
 
@@ -65,7 +66,7 @@ export class UserService {
     async followUnfollowUser(username: string, userId: number) {
         try {
 
-            
+
 
 
             const followUnfollowStatus = await UserRepository.followUnfollowUser(username, userId)
@@ -106,13 +107,13 @@ export class UserService {
     }
     async getUserTweets(userId: number) {
         try {
-            const userOriginalTweets :any = await UserRepository.getUserTweets(userId);
+            const userOriginalTweets: any = await UserRepository.getUserTweets(userId);
 
             console.log(userOriginalTweets, "tweets original in service")
 
-            let userRetweets :any = await UserRepository.getUserRetweets(userId);
-            
-            let userReplies :any = await UserRepository.getUserReplies(userId);
+            let userRetweets: any = await UserRepository.getUserRetweets(userId);
+
+            let userReplies: any = await UserRepository.getUserReplies(userId);
 
             //i am differentiating this here in thsi service to show in frontned that this are the retweets and original by the user...
 
@@ -126,10 +127,10 @@ export class UserService {
             // }
 
             return {
-                success:true,
-                message:"tweets fetched successfully",
-                data:{userOriginalTweets,userRetweets,userReplies},
-                statusCode : 200,
+                success: true,
+                message: "tweets fetched successfully",
+                data: { userOriginalTweets, userRetweets, userReplies },
+                statusCode: 200,
             }
 
 
@@ -138,52 +139,106 @@ export class UserService {
             return {
                 success: false,
                 message: err.message,
-                statusCode : 500
+                statusCode: 500
             }
         }
     }
-    async getUserFeed(userId:number){
+    async getUserFeed(userId: number) {
         //now in user feed there will be tweets of the followers and followings of the user and if we want then show the user tweets also but not doing it right now and show them in latest tweeted order desc order of created_at
-        
+
         //step 1 : have to fetch the followers and followings list
         //step2 : 
 
-        try{
+        try {
             const userFeed = await UserRepository.getUserFeed(userId);
 
-        console.log(userFeed,"tweets of users who the loggedin user follows")
+            console.log(userFeed, "tweets of users who the loggedin user follows")
+
+            return {
+                success: true,
+                message: "feed fetched successfully",
+                data: userFeed,
+                statusCode: 200,
+            }
+
+
+        } catch (err: any) {
+            return {
+                success: false,
+                message: err.message,
+                statusCode: 500,
+            }
+        }
+
+
+
+    }
+    async getUserFollowers(userId: number) {
+        try {
+            const followers = await UserRepository.getUserFollowers(userId);
+
+            return {
+                success: true,
+                message: "followers fetched successfully",
+                data: followers
+            }
+
+
+
+
+        } catch (err: any) {
+            return {
+                success: false,
+                message: err.message,
+                statusCode: 400,
+            }
+        }
+
+
+    }
+    async getUserFollowings(userId: number) {
+        try {
+            const followings = await UserRepository.getUserFollowings(userId);
+
+            return {
+                success: true,
+                message: "followings fetched successfully",
+                data: followings,
+                statusCode:200
+            }
+
+
+
+
+        } catch (err: any) {
+            return {
+                success: false,
+                message: err.message,
+                statusCode: 400,
+            }
+        }
+    }
+
+    async fetchAllUsers(userId:number) {
+        try{
+            const allUsers = await UserRepository.fetchAllUsers(userId);
 
         return {
             success:true,
-            message:"feed fetched successfully",
-            data : userFeed,
-            statusCode : 200,
+            message:"all users fetched successfully",
+            data:allUsers,
+            statusCode : 200
         }
-
 
         }catch(err:any){
             return {
                 success:false,
                 message:err.message,
-                statusCode : 500 ,
+                statusCode : 400
             }
         }
         
-
-
-}
-    async getUserFollowers(userId:number){
-        const followers = await UserRepository.getUserFollowers(userId);
-    }
-    async getUserFollowings(userId:number){
-        const followings = await UserRepository.getUserFollowings(userId);
     }
 
-    async fetchAllUsers(){
-        const allUsers = await UserRepository.fetchAllUsers();
 
-        return allUsers;
-    }
-
-    
 }

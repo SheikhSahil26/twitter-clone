@@ -114,19 +114,54 @@ export class AuthRepository {
 
 
 
-    static async resetPassword(newPassword: string, userId: number) {
+    static async resetPassword(newPassword: string, token: string) {
+        try{
+            const hash_password = await bcrypt.hash(newPassword, saltRounds)
 
-        const hash_password = await bcrypt.hash(newPassword, saltRounds)
+            console.log(token,newPassword)
+
+        const [result]:any = await db.execute<RowDataPacket[]>(
+            `select user_id from OTP where reset_token=?`,[token]
+        )
+        console.log(result)
+        console.log(result[0].user_id);
+
 
 
 
         const [query] = await db.execute<ResultSetHeader>(
-            `update users set password_hash=? where id=?`, [hash_password, userId]
+            `update users set password_hash=? where id=?`, [hash_password, result[0].user_id??null]
+        )
+
+        const [query2] = await db.execute<ResultSetHeader>(
+            `delete from OTP where user_id`,[result[0].user_id]
         )
 
         console.log(query);
-    }
 
+
+
+        }catch(err){
+            console.log(err)
+            throw new Error("DB_ERROR")
+        }
+        
+
+    }
+    static async verifyToken(token:string){
+        try{
+            const [result] = await db.execute<RowDataPacket[]>(
+                `select * from OTP where reset_token=?`,[token]
+            )
+            if(result.length===0){
+                return 0;
+            }
+            return 1;
+
+        }catch(err){
+            throw new Error("DB_ERROR")
+        }
+    }
 
     static async getAttempts(userEmail: string): Promise<number> {
 

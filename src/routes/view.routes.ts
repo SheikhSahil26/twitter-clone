@@ -53,4 +53,25 @@ router.get("/verify-otp",(req:Request,res:Response)=>{
     res.render("verify-otp",{token})
 })
 
+router.get("/followers/:username",(req:Request,res:Response)=>{
+    const username = req.params.username;
+    res.render("follower",{username:username});
+})
+router.get("/followings/:username",(req:Request,res:Response)=>{
+    const username = req.params.username;
+    res.render("following",{username:username});
+})
+
+router.get("/followers",(req:Request,res:Response)=>{
+    res.render("follower",{username:""});
+})
+router.get("/followings",(req:Request,res:Response)=>{
+    res.render("following",{username:""});
+})
+
+router.get("/reset-password",(req:Request,res:Response)=>{
+    const token = req.query.token;
+    res.render("reset-password",{token:token});
+})
+
 export default router;

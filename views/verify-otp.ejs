@@ -32,6 +32,8 @@
         We sent a 6-digit code to your email. Enter it below to verify your identity.
       </p>
 
+      <h3 id="timer"></h3>
+
       <form id="verifyForm" class="flex flex-col gap-6">
         <!-- OTP Input with Floating Label -->
         <div class="relative w-full border border-gray-800 rounded-[4px] focus-within:ring-1 focus-within:ring-[#1d9bf0] focus-within:border-[#1d9bf0] transition-shadow group">
@@ -58,11 +60,42 @@
             </button>
         </div>
       </form>
+      <a id="reset-link"></a>
     </div>
   </main>
 <script>
 
     const resetToken = "<%= token %>";
+
+   let timerEle = document.getElementById("timer")
+
+    function timer(diffInSeconds){
+       
+        
+        let x=setInterval(()=>{
+
+           
+                timerEle.innerHTML=`your remaining time is ${diffInSeconds}`;
+                
+                diffInSeconds--
+
+                if(diffInSeconds<0){
+                    clearInterval(x);
+                   
+                    alert("OTP expired")
+                    window.location.href="/forgot-password"
+                    
+                    // isGameOver=true;
+                }
+        
+
+            
+        },1000)
+    }
+    
+
+
+
 
     async function getOTP() {
 
@@ -84,13 +117,8 @@
 
             const diffInSeconds = Math.floor((expiryTime - currentTime) / 1000);
 
-            const timer = document.getElementById("timer")
+            timer(diffInSeconds)
 
-            setInterval(() => {
-                const currentT = new Date().getTime();
-                timer.innerText = Math.floor((expiryTime - currentTime) / 1000);
-
-            }, 1000)
 
         }
 
@@ -98,6 +126,59 @@
 
     }
     getOTP();
+
+
+
+
+
+    const verifyBtn = document.getElementById("verifyBtn")
+    verifyBtn.addEventListener("click", verifyOTP)
+
+    async function verifyOTP(){
+
+       const verifyForm = document.getElementById("verifyForm");
+       const data = new FormData(verifyForm)
+         const values = Object.fromEntries(data.entries())
+        console.log(data)
+        console.log(values);
+
+        console.log(values)
+
+        values.token = resetToken
+
+      
+        const res = await fetch(`/api/auth/verify-otp`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body:JSON.stringify(values),
+        })
+
+
+        const respData = await res.json();
+
+        console.log(respData,"res data")
+
+        if (respData.error) {
+            alert(respData.error);
+        }
+        else{
+          const resetLink = document.getElementById("reset-link");
+          resetLink.href = `${respData.token}`
+          resetLink.innerText = respData.token
+        }
+
+      
+    }
+
+
+
+
+
+
+
+
 
 
 

@@ -24,6 +24,9 @@ router.get("/get-user-tweets/",protectedRoutes,userControllers.getUserTweets)
 
 router.get("/get-user-tweets/:username",protectedRoutes,userControllers.getUserTweetsByUsername)
 
+router.get("/get-user-followers/:username",protectedRoutes,userControllers.getFollowersByUsername)
+
+router.get("/get-user-followings/:username",protectedRoutes,userControllers.getFollowingsByUsername)
 
 router.get("/user-feed",protectedRoutes,userControllers.getUserFeed);
 

@@ -16,6 +16,7 @@ router.post("/verify-otp",authControllers.verifyOtp);
 router.post("/reset-password",authControllers.resetPassword);
 router.post("/refresh-token",authControllers.refreshToken)
 router.get("/get-otp/:token",authControllers.getOtp)
+router.get("/verify-token/:token",authControllers.verifyToken)
 // router.post("/logout",authControllers.logout)
 // router.get('/login/federated/google', passport.authenticate('google'));
 

@@ -71,13 +71,8 @@
                         Joined October 2023
                     </span>
                 </div>
-
-                <div class="flex gap-5 mt-3 text-[14px]">
-                    <button class="hover:underline"><span id="followings" class="font-bold text-white">124</span> <span 
-                            class="text-[#71767b]">Following</span></button>
-                    <button class="hover:underline"><span id="followers" class="font-bold text-white">850</span> <span
-                            class="text-[#71767b]">Followers</span></button>
-                </div>
+                <div id="follow-following-container"></div>
+               
             </div>
         </div>
 
@@ -138,12 +133,30 @@
         bannerImage.src = `/${data.profileData.cover_image_url}`;
 
         bio.innerText = data.profileData.bio;
-        followers.innerText = data.profileData.followers
-        followings.innerText = data.profileData.followings
+       
 
         joined.innerText = data.profileData.created_at
 
         usernameBody.innerText = data.profileData.username
+
+
+
+        const followFollowingContainer = document.getElementById("follow-following-container");
+        const followFollowingDiv = document.createElement("div")
+        const followFollowingContent = ` <div class="flex gap-5 mt-3 text-[14px]">
+                    <a href="/followings/${username}">
+                    <button class="hover:underline"><span id="followings" class="font-bold text-white">${data.profileData.followings}</span> <span 
+                            class="text-[#71767b]">Following</span></button>
+                        </a>
+                        <a href="/followers/${username}">
+                    <button class="hover:underline"><span id="followers" class="font-bold text-white">${data.profileData.followers}</span> <span
+                            class="text-[#71767b]">Followers</span></button>
+                            </a>
+                </div>`
+
+                followFollowingDiv.innerHTML = followFollowingContent
+
+                followFollowingContainer.append(followFollowingDiv)
 
 
 

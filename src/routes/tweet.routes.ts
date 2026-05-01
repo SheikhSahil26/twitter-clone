@@ -19,7 +19,7 @@ router.post("/create-tweet",protectedRoutes,upload.array("media",4),tweetControl
 router.post("/retweet",protectedRoutes,tweetControllers.reTweet)
 
 router.post("/like-unlike-tweet/:id",protectedRoutes,tweetControllers.likeUnlikeTweet)
-router.post("/reply/:tweetId",protectedRoutes,tweetControllers.replyOnTweet);
+router.post("/reply/:tweetId",protectedRoutes,upload.array("media",4),tweetControllers.replyOnTweet);
 router.delete("/delete/:id",protectedRoutes,tweetControllers.deleteTweet)
 
 router.get("/get-tweet/:tweetId",protectedRoutes,tweetControllers.getTweetById)

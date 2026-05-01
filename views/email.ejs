@@ -5,10 +5,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width='device-width', initial-scale=1.0">
     <title>Document</title>
+     <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://cdn.googleapis.com');
+    body { font-family: 'Inter', sans-serif; }
+  </style>
 </head>
 
 <body>
     this is email page
+
+
+    <div class="w-full max-w-2xl bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200">
+    
+    <!-- Email Header / Sidebar Mock -->
+    <div class="bg-[#f8f9fa] border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="w-3 h-3 rounded-full bg-red-400"></div>
+        <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+        <div class="w-3 h-3 rounded-full bg-green-400"></div>
+        <span class="ml-4 text-sm font-medium text-gray-500">Inbox (1) — info@x.com</span>
+      </div>
+    </div>
+
+    <!-- Email Content -->
+    <div class="p-8 md:p-12">
+      <!-- Sender Info -->
+      <div class="flex items-center gap-4 mb-8">
+        <div class="w-12 h-12 bg-black rounded-full flex items-center justify-center">
+            <svg viewBox="0 0 24 24" class="h-6 w-6 fill-white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
+        </div>
+        <div>
+          <h3 class="font-bold text-gray-900 text-lg">X <span class="font-normal text-gray-500 text-sm">&lt;info@x.com&gt;</span></h3>
+          <p class="text-sm text-gray-500">To: you@example.com</p>
+        </div>
+      </div>
+
+      <!-- Subject Line -->
+      <h1 class="text-2xl font-bold text-gray-900 mb-6">Confirm your identity</h1>
+
+      <!-- Body -->
+      <div class="text-gray-700 leading-relaxed space-y-4 border-t border-gray-100 pt-6">
+        <p>Hello,</p>
+        <p>We received a request to access your X account. Please use the following verification code to complete the process. This code will expire in 10 minutes.</p>
+        
+        <!-- OTP BOX -->
+        <div class="my-10 text-center">
+          <div class="inline-block bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg px-10 py-6">
+            <span id="otp-display" class="text-5xl font-extrabold tracking-[0.2em] text-black">
+              123456
+            </span>
+          </div>
+          <p class="text-xs text-gray-400 mt-4 uppercase tracking-widest">Verification Code</p>
+        </div>
+
+        <p>If you didn't request this, you can safely ignore this email.</p>
+        <p class="pt-4 italic text-sm">Thanks, <br>The X Team</p>
+      </div>
+    </div>
+
+    <!-- Email Footer -->
+    <div class="bg-gray-50 px-6 py-4 text-center text-xs text-gray-400">
+      Sent with ❤️ from X Corp. | 1355 Market St, San Francisco, CA
+    </div>
+  </div>
+
+
+
+
     <h1 id="otp"></h1>
 </body>
 <script>

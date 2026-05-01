@@ -45,12 +45,16 @@ export class UserRepository {
     m.tweet_content_url,
     (select count(*) from tweet_likes tl where tl.tweet_id = t.tweet_id) as like_count,
     (select count(*) from tweets where t.original_tweet_id is not null) as retweet_count,
-    (select count(*) from tweets where t.parent_tweet_id is not null) as reply_count
+    (select count(*) from tweets where t.parent_tweet_id is not null) as reply_count,
+     EXISTS (
+        SELECT 1 FROM tweet_likes 
+        WHERE tweet_id = t.tweet_id AND liked_by = ?
+    ) AS is_liked
 FROM tweets t
 JOIN users u ON t.tweeted_by = u.id
 LEFT JOIN media m ON t.tweet_id = m.tweet_id
 WHERE t.tweeted_by = ? and t.original_tweet_id is null and t.parent_tweet_id is null
-ORDER BY t.created_at DESC; `, [userId]
+ORDER BY t.created_at DESC; `, [userId,userId]
     )
 
     console.log(query.length, "user tweets for profile!!!");
@@ -76,12 +80,16 @@ ORDER BY t.created_at DESC; `, [userId]
     m.tweet_content_url,
     (select count(*) from tweet_likes tl where tl.tweet_id = t.tweet_id) as like_count,
     (select count(*) from tweets where t.original_tweet_id is not null) as retweet_count,
-    (select count(*) from tweets where t.parent_tweet_id is not null) as reply_count
+    (select count(*) from tweets where t.parent_tweet_id is not null) as reply_count,
+     EXISTS (
+        SELECT 1 FROM tweet_likes 
+        WHERE tweet_id = t.tweet_id AND liked_by = ?
+    ) AS is_liked
 FROM tweets t
 JOIN users u ON t.tweeted_by = u.id
 LEFT JOIN media m ON t.tweet_id = m.tweet_id
 WHERE t.tweeted_by = ? and t.original_tweet_id is not null
-ORDER BY t.created_at DESC; `, [userId]
+ORDER BY t.created_at DESC; `, [userId,userId]
     )
 
     console.log(query.length, "user tweets for profile!!!");
@@ -107,12 +115,16 @@ ORDER BY t.created_at DESC; `, [userId]
     m.tweet_content_url,
     (select count(*) from tweet_likes tl where tl.tweet_id = t.tweet_id) as like_count,
     (select count(*) from tweets where t.original_tweet_id is not null) as retweet_count,
-    (select count(*) from tweets where t.parent_tweet_id is not null) as reply_count
+    (select count(*) from tweets where t.parent_tweet_id is not null) as reply_count,
+     EXISTS (
+        SELECT 1 FROM tweet_likes 
+        WHERE tweet_id = t.tweet_id AND liked_by = ?
+    ) AS is_liked
 FROM tweets t
 JOIN users u ON t.tweeted_by = u.id
 LEFT JOIN media m ON t.tweet_id = m.tweet_id
 WHERE t.tweeted_by = ? and t.parent_tweet_id is not null
-ORDER BY t.created_at DESC;`, [userId]
+ORDER BY t.created_at DESC;`, [userId,userId]
     )
 
     console.log(query.length, "user tweets for profile!!!");
@@ -140,7 +152,11 @@ ORDER BY t.created_at DESC;`, [userId]
     m.tweet_content_url,
     (SELECT COUNT(*) FROM tweet_likes tl WHERE tl.tweet_id = t.tweet_id) AS like_count,
     (select count(*) from tweets where t.original_tweet_id is not null) as retweet_count,
-    (select count(*) from tweets where t.parent_tweet_id is not null) as reply_count
+    (select count(*) from tweets where t.parent_tweet_id is not null) as reply_count,
+    EXISTS (
+        SELECT 1 FROM tweet_likes 
+        WHERE tweet_id = t.tweet_id AND liked_by = ?
+    ) AS is_liked
 FROM tweets t
 JOIN users u ON t.tweeted_by = u.id
 LEFT JOIN media m ON t.tweet_id = m.tweet_id
@@ -149,7 +165,7 @@ WHERE (
 )
 
 ORDER BY t.created_at DESC;
- `,[userId]
+ `,[userId,userId]
       )
 
       console.log(query);
@@ -170,7 +186,7 @@ ORDER BY t.created_at DESC;
 
       console.log(query);
 
-      return query
+      return query as []
 
     }catch(err){
       throw new Error("DB_ERR while fethcing followers")
@@ -252,14 +268,14 @@ ORDER BY t.created_at DESC;
 
   }
 
-  static async fetchAllUsers():Promise<User[]>{
+  static async fetchAllUsers(userId:number):Promise<User[]>{
     
     try{
       const [query]:any = await db.execute<RowDataPacket[]>(
-        `select id,profile_photo_url,username,f_name,l_name from users`
+        `select id,profile_photo_url,username,f_name,l_name from users where id<>? `,[userId]
       )
 
-      console.log(query,"all users");
+      console.log(query,"all users except logged in");
 
       return query as [];
 

@@ -148,11 +148,11 @@ export class TweetRepository {
             const tweetMedia = replyTweetBody.media || [];
 
           
-            for (let media of tweetMedia) {
+             tweetMedia.forEach(async(media:any)=>{
                 const [query] = await db.execute<ResultSetHeader>(
-                    `insert into media (tweet_id,tweet_content_url) values (?,?)`, [insertId, media.tweet_content_url]
+                    `insert into media (tweet_id,tweet_content_url) values (?,?)`, [insertId, media]
                 )
-            }
+            })
 
             
 
@@ -212,7 +212,10 @@ WHERE t.tweet_id = ?;
     t.created_at,
     u.username,
     u.profile_photo_url,
-    m.tweet_content_url
+    m.tweet_content_url,
+     (SELECT COUNT(*) FROM tweet_likes WHERE tweet_id = t.tweet_id) as like_count,
+    (SELECT COUNT(*) FROM tweets WHERE parent_tweet_id = t.tweet_id) as reply_count,
+    (SELECT COUNT(*) FROM tweets WHERE original_tweet_id = t.tweet_id) as retweet_count
 FROM tweets t
 JOIN users u ON t.tweeted_by = u.id
 LEFT JOIN media m ON t.tweet_id = m.tweet_id

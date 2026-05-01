@@ -10,6 +10,7 @@ import { generateRefreshToken, generateAccessToken } from "../utils/generateToke
 import crypto from "crypto";
 import { success } from "zod";
 import { generateOTP } from "../utils/generateOTP.js";
+import { STATUS_CODES } from "http";
 
 
 type ServiceResponse<T> = {
@@ -168,7 +169,8 @@ export class AuthService {
                 return {
                     success: true,
                     message: "If email exists, reset link sent",
-                    statusCode: 200
+                    data:"",
+                    statusCode: 401
                 };
             }
 
@@ -187,7 +189,7 @@ export class AuthService {
             const token = crypto.createHash('sha256').update(result).digest("hex");
             console.log(token)
             console.log("hello")
-            const expiryTime = new Date(Date.now() + (20 * 1000));//20s expiry time
+            const expiryTime = new Date(Date.now() + (60 * 1000));//20s expiry time
 
             const OTP = generateOTP(6)
 
@@ -218,14 +220,14 @@ export class AuthService {
 
             console.log(otpFromDb,"otp from db")
 
-            if(otpFromDb[0].otp!==OTP){
+            if(otpFromDb.otp!==OTP){
                 return {
                     success: false,
                     error: "invalid OTP",
                     statusCode: 400,
                 }
             }
-            if (Date.now() > otpFromDb[0].expiry_time) {
+            if (Date.now() > otpFromDb.expiry_time) {
                 return {
                     success: false,
                     error: "otp expired",
@@ -274,10 +276,40 @@ export class AuthService {
             }
         }
     }
-   
+    
+    async verifyToken(token:string){
+
+        try{
+            const isValid = await AuthRepository.verifyToken(token);
+
+        if(!isValid){
+            return {
+                success:false,
+                statusCode:400,
+                message:"invalid token"
+            }
+        }
+
+        return {
+            success:true,
+            statusCode:200,
+            message:"valid token"
+        }
+
+        }
+        catch(err:any){
+            return {
+                success:false,
+                message:err.message,
+                statusCode:400,
+            }
+        }
+        
+
+    }
 
 
-    async resetPassword(newPassword: string, id: string): Promise<ServiceResponse<string>> {
+    async resetPassword(newPassword: string, token: string): Promise<ServiceResponse<string>> {
 
         try {
             // const existingToken = await AuthRepository.getOTP(token)
@@ -300,16 +332,18 @@ export class AuthService {
             // }
 
 
-            await AuthRepository.resetPassword(newPassword, Number(id));
-
+            await AuthRepository.resetPassword(newPassword, token);
+            console.log("service reset pass")
             return {
                 success: true,
                 statusCode: 200,
+                message:"password updated successfully"
             }
         }
 
-        catch (err) {
+        catch (err:any) {
             return {
+                message:err.message,
                 success: false,
                 statusCode: 500,
             }

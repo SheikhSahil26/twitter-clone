@@ -110,7 +110,20 @@ export class TweetControllers {
             const tweetId = Number(req.params.tweetId);
             const userId = (req as any).user.payload.id;
 
+            let mediaUrls : string[]= []
+    if(Array.isArray(req.files)){
+         mediaUrls = req.files?.map((file: any) => '/uploads/' + file.filename) || []
+     }
+     console.log(mediaUrls,"asdfasd")
+
+
+
             const replyTweetBody = req.body;
+
+            replyTweetBody.media = mediaUrls;
+
+
+            console.log(replyTweetBody,"reply tweet body")
 
             const resp :any= await tweetService.replyOnTweet(replyTweetBody,tweetId,userId)
 
@@ -153,7 +166,8 @@ export class TweetControllers {
        
         
         console.log(resp.data,"controller")
-
+        console.log(resp.data.tweet,"tweet")
+        console.log(resp.data.tweetReplies,"replies")
 
         return res.status(200).json({
             tweet : resp.data.tweet,

@@ -28,7 +28,7 @@
       <!-- User Info -->
       <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-3">
-          <img id="main-image" class="h-12 w-12 rounded-full" alt="Avatar">
+          <img id="profile-image" class="h-12 w-12 rounded-full" alt="Avatar">
           <div class="flex flex-col">
             <span id="username" class="font-bold hover:underline cursor-pointer"></span>
             <!-- <span class="text-[#71767b]">@username</span> -->
@@ -39,9 +39,11 @@
         </div>
       </div>
 
+      <img id="main-image" alt="no-image">
+
       <!-- Tweet Content -->
       <div id="tweet-content" class="text-[23px] leading-normal mb-4">
-        Building the future of social media with Tailwind CSS and HTML. The thread UI is coming along nicely! 🚀 <span class="text-[#1d9bf0]">#XClone</span> <span class="text-[#1d9bf0]">#WebDev</span>
+          <span class="text-[#1d9bf0]"></span> <span class="text-[#1d9bf0]"></span>
       </div>
 
       <!-- Timestamp & Stats -->
@@ -53,9 +55,9 @@
 
       <!-- Interaction Counts -->
       <div class="py-4 border-b border-gray-800 flex gap-5 text-[15px]">
-        <div class="hover:underline cursor-pointer"><span id="retweet" class="font-bold">842</span> <span class="text-[#71767b]">Retweets</span></div>
-        <div class="hover:underline cursor-pointer"><span id="reply" class="font-bold">125</span> <span class="text-[#71767b]">Quotes</span></div>
-        <div class="hover:underline cursor-pointer"><span id="likes" class="font-bold">12.4K</span> <span class="text-[#71767b]">Likes</span></div>
+        <div ><span id="retweet" class="font-bold">842</span> <span class="text-[#71767b]">Retweets</span></div>
+        <div ><span id="reply" class="font-bold">125</span> <span class="text-[#71767b]">Quotes</span></div>
+        <div><span id="likes" class="font-bold">12.4K</span> <span class="text-[#71767b]">Likes</span></div>
       </div>
 
       <!-- Action Bar -->
@@ -76,19 +78,20 @@
     </article>
 
     <!-- Reply Input Box -->
+     <form id="reply-form" enctype="multipart/form-data">
     <div class="px-4 py-3 flex gap-3 border-b border-gray-800 items-center">
       <img src="https://twimg.com" class="h-10 w-10 rounded-full" alt="Avatar">
-      <input type="text" placeholder="Post your reply" class="flex-1 bg-transparent text-[19px] focus:outline-none placeholder-[#71767b]">
-      <button class="bg-[#1d9bf0] text-white font-bold px-4 py-1.5 rounded-full opacity-50 cursor-not-allowed">Reply</button>
+      <input type="text" name="tweet_content" id="reply-text" placeholder="Post your reply" class="flex-1 bg-transparent text-[19px] focus:outline-none placeholder-[#71767b]">
+      <input type="file" name="media">
+      <button id="submit-btn" class="bg-[#1d9bf0] text-white font-bold px-4 py-1.5 rounded-full" type="button">Reply</button>
     </div>
+    </form>
 
     <!-- Replies Thread -->
     <div class="flex flex-col">
 
+    <!-- thread container -->
         <div id="reply-container"></div>
-      
-      <!-- Reply 1 -->
-     
 
     </div>
 
@@ -114,8 +117,10 @@
         });
 
         const data = await res.json();
-        console.log(data.tweet, "tweet page data");
+        console.log(data.tweet[0], "tweet page data");
+        console.log(data.replies,"replies")
 
+        let tweet = data.tweet[0]
 
         //this is main tweet
         const likes = document.getElementById("likes")
@@ -124,41 +129,48 @@
         const retweets = document.getElementById("retweet")
         const tweetContent = document.getElementById("tweet-content");
         const image = document.getElementById("main-image")
+        const profilePhoto= document.getElementById("profile-image")
 
-        likes.innerText = data.tweet.tweet[0].like_count
-        reply.innerText = data.tweet.tweet[0].reply_count
-        username.innerText = data.tweet.tweet[0].username;
-        retweets.innerText = data.tweet.tweet[0].retweet_count
-        tweetContent.innerText = data.tweet.tweet[0].tweet_content
-        image.src = `${data.tweet.tweet[0].tweet_content_url}`
+        likes.innerText =tweet.like_count
+        reply.innerText =tweet.reply_count
+        username.innerText =tweet.username;
+        retweets.innerText =tweet.retweet_count
+        tweetContent.innerText =tweet.tweet_content
+        image.src = `${tweet.tweet_content_url}`
+        profilePhoto.src = `${tweet.profile_photo_url}`
 
 
         //this is for reply of the tweets
         const replyContainer = document.getElementById("reply-container");
 
-         let replies = data.tweet.tweetReplies
+         let replies = data.replies
 
          replies.forEach(reply => {
             const replyDiv = document.createElement("div")
 
             const replyContent = `<div class="px-4 py-3 border-b border-gray-800 flex gap-3 hover:bg-white/[0.03] transition-colors cursor-pointer">
         <div class="flex flex-col items-center">
-          <img src="${reply.tweet_content_url}" class="h-10 w-10 rounded-full mb-1" alt="Avatar">
+          <img src="${reply.profile_photo_url}" class="h-10 w-10 rounded-full mb-1" alt="Avatar">
           
           <div class="w-0.5 h-full bg-[#333639]"></div>
         </div>
         <div class="flex-1">
           <div class="flex items-center gap-1">
-            <span class="font-bold hover:underline">Reply Guy</span>
+            <span class="font-bold hover:underline">${reply.username}</span>
             <span class="text-[#71767b]">@replier · 2h</span>
           </div>
+          <a href="/tweet/${reply.tweet_id}">
+          <img src="${reply.tweet_content_url}">
+          
           <div class="text-[15px] mt-1">
             ${reply.tweet_content}
           </div>
+          
           <div class="flex justify-between mt-3 max-w-[425px] text-[#71767b]">
-            <span class="hover:text-[#1d9bf0] flex items-center gap-2"><svg viewBox="0 0 24 24" class="h-4 w-4 fill-current"><path d="M1.751 10c0-4.42 3.584-8 7.999-8s8.001 3.58 8.001 8c0 2.64-1.28 4.98-3.27 6.42l.79 4.41c.06.32-.22.62-.54.62-.12 0-.23-.04-.33-.12L10.141 18h-.39c-4.42 0-8-3.58-8-8zm2 0c0 3.31 2.69 6 6 6h.54l2.22 1.83-.49-2.73c.01 0 .02-.01.03-.02 2.21-1.33 3.7-3.71 3.7-6.39 0-3.31-2.69-6-6-6s-6 2.69-6 6z"></path></svg> 12</span>
-            <span class="hover:text-[#00ba7c] flex items-center gap-2"><svg viewBox="0 0 24 24" class="h-4 w-4 fill-current"><path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5c-2.209 0-4-1.79-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5c2.209 0 4 1.79 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z"></path></svg> 2</span>
-            <span class="hover:text-[#f91880] flex items-center gap-2"><svg viewBox="0 0 24 24" class="h-4 w-4 fill-current"><path d="M16.697 5.5c-1.222 0-2.379.51-3.197 1.391-.818-.881-1.975-1.391-3.197-1.391-2.359 0-4.276 1.961-4.276 4.369 0 2.726 2.454 4.965 6.16 8.328l1.313 1.189 1.313-1.189c3.706-3.363 6.16-5.602 6.16-8.328 0-2.408-1.917-4.369-4.276-4.369zM13.5 17.51l-.11.1-.11-.1c-3.39-3.08-5.66-5.13-5.66-7.64 0-1.31.99-2.32 2.27-2.32 1.01 0 1.98.67 2.33 1.58h1.56c.35-.91 1.32-1.58 2.33-1.58 1.28 0 2.27 1.01 2.27 2.32 0 2.51-2.27 4.56-5.66 7.64z"></path></svg> 45</span>
+            <span class="hover:text-[#1d9bf0] flex items-center gap-2"><svg viewBox="0 0 24 24" class="h-4 w-4 fill-current"><path d="M1.751 10c0-4.42 3.584-8 7.999-8s8.001 3.58 8.001 8c0 2.64-1.28 4.98-3.27 6.42l.79 4.41c.06.32-.22.62-.54.62-.12 0-.23-.04-.33-.12L10.141 18h-.39c-4.42 0-8-3.58-8-8zm2 0c0 3.31 2.69 6 6 6h.54l2.22 1.83-.49-2.73c.01 0 .02-.01.03-.02 2.21-1.33 3.7-3.71 3.7-6.39 0-3.31-2.69-6-6-6s-6 2.69-6 6z"></path></svg> ${reply.reply_count}</span>
+            </a>
+            <span class="hover:text-[#00ba7c] flex items-center gap-2"><svg viewBox="0 0 24 24" class="h-4 w-4 fill-current"><path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5c-2.209 0-4-1.79-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5c2.209 0 4 1.79 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z"></path></svg> ${reply.retweet_count}</span>
+            <span class="hover:text-[#f91880] flex items-center gap-2"><svg viewBox="0 0 24 24" class="h-4 w-4 fill-current"><path d="M16.697 5.5c-1.222 0-2.379.51-3.197 1.391-.818-.881-1.975-1.391-3.197-1.391-2.359 0-4.276 1.961-4.276 4.369 0 2.726 2.454 4.965 6.16 8.328l1.313 1.189 1.313-1.189c3.706-3.363 6.16-5.602 6.16-8.328 0-2.408-1.917-4.369-4.276-4.369zM13.5 17.51l-.11.1-.11-.1c-3.39-3.08-5.66-5.13-5.66-7.64 0-1.31.99-2.32 2.27-2.32 1.01 0 1.98.67 2.33 1.58h1.56c.35-.91 1.32-1.58 2.33-1.58 1.28 0 2.27 1.01 2.27 2.32 0 2.51-2.27 4.56-5.66 7.64z"></path></svg> ${reply.like_count}</span>
             <span class="hover:text-[#1d9bf0] flex items-center gap-2"><svg viewBox="0 0 24 24" class="h-4 w-4 fill-current"><path d="M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.3 3.3-1.41-1.42L12 2.59zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z"></path></svg></span>
           </div>
         </div>
@@ -178,6 +190,48 @@
 
 
         getTweet(tweetId)
+
+
+
+        
+
+       const postBtn = document.getElementById("submit-btn")
+    postBtn.addEventListener("click", reply)
+
+
+    async function reply() {
+        const replyForm = document.getElementById("reply-form");
+        const formData = new FormData(replyForm);
+
+        console.log(formData)
+
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
+
+        const res = await fetch(`/api/tweet/reply/${tweetId}`, {
+            method: "POST",
+            headers: {
+               
+                "authorization": `Bearer ${localStorage.getItem("accessToken")}`
+            },
+           
+            body: formData
+        });
+
+        const data = await res.json();
+        if(data.error){
+          alert(data.error)
+        }
+        else{
+              console.log(data, "replied on tweet successfully");
+        }
+    
+    }
+
+
+
+
 
 
 

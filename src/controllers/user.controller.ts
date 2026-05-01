@@ -264,32 +264,129 @@ export class UserControllers {
     }
     async getUserFollowers(req: Request, res: Response) {
 
-        const userId = (req as any).user.payload.id
+        try{
+            const userId = (req as any).user.payload.id
+    
+            const resp:any = await userService.getUserFollowers(userId)
+    
+             if(!resp.success){
+                    return res.status(resp.statusCode).json({
+                        error:resp.message,
+                    })
+                }
+    
+                return res.status(200).json({
+                    followers:resp.data,
+                    success:true,
+                })
+            
+        }catch(err){
+            return res.status(500).json({
+                error:"internal server error"
+            })
+        }
 
-        const resp = await userService.getUserFollowers(userId)
-
-        return res.status(200).json({
-            message: "got followers of logged in user"
-        })
+        
     }
     async getUserFollowings(req: Request, res: Response) {
 
-        const userId = (req as any).user.payload.id
-
-        const resp = await userService.getUserFollowings(userId)
-
-        return res.status(200).json({
-            message: "got followings of logged in user"
-        })
+         try{
+            const userId = (req as any).user.payload.id
+    
+            const resp:any = await userService.getUserFollowings(userId)
+    
+             if(!resp.success){
+                    return res.status(resp.statusCode).json({
+                        error:resp.message,
+                    })
+                }
+    
+                return res.status(200).json({
+                    followings:resp.data,
+                    success:true,
+                    message:resp.message,
+                })
+            
+        }catch(err){
+            return res.status(500).json({
+                error:"internal server error"
+            })
+        }
     }
+
+    async getFollowersByUsername(req:Request,res:Response){
+          try{
+            const username = req.params.username as string
+    
+            const userData:any = await userService.getUserProfile(username)
+
+            const userId = userData.data.id;
+
+            const resp :any = await userService.getUserFollowers(userId)
+    
+             if(!resp.success){
+                    return res.status(resp.statusCode).json({
+                        error:resp.message,
+                    })
+                }
+    
+                return res.status(200).json({
+                    followers:resp.data,
+                    success:true,
+                })
+            
+        }catch(err){
+            return res.status(500).json({
+                error:"internal server error"
+            })
+        }
+    }
+
+    async getFollowingsByUsername(req:Request,res:Response){
+        try{
+            const username = req.params.username as string
+    
+            const userData:any = await userService.getUserProfile(username)
+
+            const userId = userData.data.id;
+
+            const resp :any = await userService.getUserFollowings(userId)
+
+    
+             if(!resp.success){
+                    return res.status(resp.statusCode).json({
+                        error:resp.message,
+                    })
+                }
+    
+                return res.status(200).json({
+                    followings:resp.data,
+                    success:true,
+                    message:resp.message,
+                })
+            
+        }catch(err){
+            return res.status(500).json({
+                error:"internal server error"
+            })
+        }
+    }
+
 
     async fetchAllUsers(req:Request,res:Response){
         try{
-            const allUsers = await userService.fetchAllUsers();
-            console.log(allUsers,"in controller");
+            const userId = (req as any).user.payload.id;
+            const resp = await userService.fetchAllUsers(userId);
+            console.log(resp,"in controller");
+
+            if(!resp.success){
+                return res.status(resp.statusCode).json({
+                    error:resp.message,
+                })
+            }
 
             return res.status(200).json({
-                allUsers:allUsers,
+                allUsers:resp.data,
                 success:true,
             })
 
