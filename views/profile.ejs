@@ -79,14 +79,14 @@
 
     <!-- Profile Tabs Navigation -->
     <nav class="flex border-b border-gray-800">
-      <div class="flex-1 flex flex-col items-center hover:bg-white/10 transition-colors cursor-pointer pt-4">
-        <span class="font-bold text-[15px] pb-3 border-b-4 border-[#1d9bf0]">Posts</span>
+      <div id="posts-tab" class="flex-1 flex flex-col items-center hover:bg-white/10 transition-colors cursor-pointer pt-4">
+        <span id="posts-tab-text" class="font-bold text-[15px] pb-3 border-b-4 border-[#1d9bf0]">Posts</span>
       </div>
-      <div class="flex-1 flex flex-col items-center hover:bg-white/10 transition-colors cursor-pointer pt-4">
-        <span class="text-[#71767b] font-medium text-[15px] pb-3">Replies</span>
+      <div id="replies-tab" class="flex-1 flex flex-col items-center hover:bg-white/10 transition-colors cursor-pointer pt-4">
+        <span id="replies-tab-text" class="text-[#71767b] font-medium text-[15px] pb-3">Replies</span>
       </div>
-      <div class="flex-1 flex flex-col items-center hover:bg-white/10 transition-colors cursor-pointer pt-4">
-        <span class="text-[#71767b] font-medium text-[15px] pb-3">Highlights</span>
+      <div id="retweets-tab" class="flex-1 flex flex-col items-center hover:bg-white/10 transition-colors cursor-pointer pt-4">
+        <span id="retweets-tab-text" class="text-[#71767b] font-medium text-[15px] pb-3">Retweets</span>
       </div>
       <div class="flex-1 flex flex-col items-center hover:bg-white/10 transition-colors cursor-pointer pt-4">
         <span class="text-[#71767b] font-medium text-[15px] pb-3">Media</span>
@@ -106,6 +106,11 @@
     <script>
 
         const username = "<%= username %>"
+        let profileTweetsData = {
+            userOriginalTweets: [],
+            userRetweets: [],
+            userReplies: []
+        }
 
 
  async function getUserProfile() {
@@ -129,8 +134,8 @@
         const bannerImage = document.getElementById("banner-image");
         const usernameBody = document.getElementById("username")
 
-        profileImage.src = `/${data.profileData.profile_photo_url}`;
-        bannerImage.src = `/${data.profileData.cover_image_url}`;
+        profileImage.src = `${data.profileData.profile_photo_url}`;
+        bannerImage.src = `${data.profileData.cover_image_url}`;
 
         bio.innerText = data.profileData.bio;
        
@@ -167,6 +172,95 @@
 
     //get user tweets
 
+    const feedContainer = document.getElementById("feed-container")
+    const postsTab = document.getElementById("posts-tab")
+    const repliesTab = document.getElementById("replies-tab")
+    const retweetsTab = document.getElementById("retweets-tab")
+    const postsTabText = document.getElementById("posts-tab-text")
+    const repliesTabText = document.getElementById("replies-tab-text")
+    const retweetsTabText = document.getElementById("retweets-tab-text")
+
+    postsTab.addEventListener("click", renderPostsTab)
+    repliesTab.addEventListener("click", renderRepliesTab)
+    retweetsTab.addEventListener("click", renderRetweetsTab)
+
+    function setActiveTab(activeTab) {
+        postsTabText.className = activeTab === "posts"
+            ? "font-bold text-[15px] pb-3 border-b-4 border-[#1d9bf0]"
+            : "text-[#71767b] font-medium text-[15px] pb-3"
+
+        repliesTabText.className = activeTab === "replies"
+            ? "font-bold text-[15px] pb-3 border-b-4 border-[#1d9bf0]"
+            : "text-[#71767b] font-medium text-[15px] pb-3"
+
+        retweetsTabText.className = activeTab === "retweets"
+            ? "font-bold text-[15px] pb-3 border-b-4 border-[#1d9bf0]"
+            : "text-[#71767b] font-medium text-[15px] pb-3"
+    }
+
+    function renderPostsTab() {
+        setActiveTab("posts")
+        renderTweets(profileTweetsData.userOriginalTweets)
+    }
+
+    function renderRepliesTab() {
+        setActiveTab("replies")
+        renderTweets(profileTweetsData.userReplies)
+    }
+
+    function renderRetweetsTab() {
+        setActiveTab("retweets")
+        renderTweets(profileTweetsData.userRetweets)
+    }
+
+    function renderTweets(tweets) {
+        feedContainer.innerHTML = ""
+
+        for(let i=0;i<tweets.length;i++){
+            let tweet = tweets[i];
+            const mediaHtml = tweet.media && tweet.media.length > 0 
+    ? tweet.media.map(item => `
+        <img src="${item}" class="w-full h-auto object-cover border-b border-gray-800 last:border-b-0">
+      `).join('')
+    : '';
+
+            console.log(mediaHtml,"this is media html")
+
+            const isLiked = Boolean(Number(tweet.is_liked));
+            const likeColorClass = isLiked ? "text-pink-500" : "";
+
+            let feedDiv = document.createElement("div")
+            let feedContent = `<article class="p-4 border-b border-gray-800 hover:bg-white/5 transition cursor-pointer">
+            <div class="flex gap-3">
+               <a href="/profile/${tweet.username}"> <img src="${tweet.profile_photo_url}" class="w-10 h-10 rounded-full bg-gray-700"></a>
+                <div class="flex-1">
+                    <div class="flex items-center gap-1">
+                        <a href="/profile/${tweet.username}"><span class="font-bold hover:underline">${tweet.username}</span></a>
+                        <span class="text-gray-500">@${tweet.username}· 6h</span>
+                    </div>
+                    <a href="/tweet/${tweet.tweet_id}">
+                    <p class="mt-1 mb-3">${tweet.tweet_content}</p>
+                    <div class="rounded-2xl border border-gray-800 overflow-hidden">
+                        <div class="rounded-2xl border border-gray-800 overflow-hidden flex flex-col">
+                    ${mediaHtml}
+                </div>
+                    </div>
+                    </a>
+                    <!-- Post Actions -->
+                    <div class="flex justify-between mt-4 text-gray-500 max-w-md">
+                        <div class="flex items-center gap-2 group"><span class="p-2 rounded-full group-hover:bg-blue-500/10 group-hover:text-blue-500">💬</span> ${tweet.reply_count}</div>
+                        <div data-retweet-action="${tweet.tweet_id}" class="flex items-center gap-2 group"><span onclick="retweet(event, ${tweet.tweet_id})" class="p-2 rounded-full group-hover:bg-green-500/10 group-hover:text-green-500">🔁</span> <span data-retweet-count="${tweet.tweet_id}">${tweet.retweet_count}</span></div>
+                        <div data-like-action="${tweet.tweet_id}" class="flex items-center gap-2 group ${likeColorClass}" style="${isLiked ? 'color:#ec4899;' : ''}"><span onclick="likeTweet(event, ${tweet.tweet_id})" data-like-button="${tweet.tweet_id}" class="p-2 rounded-full cursor-pointer group-hover:bg-pink-500/10 group-hover:text-pink-500" style="${isLiked ? 'color:#ec4899;' : ''}">❤️</span> <span data-like-count="${tweet.tweet_id}" style="${isLiked ? 'color:#ec4899;' : ''}">${tweet.like_count}</span></div>
+                        <div class="flex items-center gap-2 group"><span class="p-2 rounded-full group-hover:bg-blue-500/10 group-hover:text-blue-500">📊</span> 418k</div>
+                    </div>
+                </div>
+            </div>
+        </article>`
+        feedDiv.innerHTML = feedContent
+        feedContainer.append(feedDiv)
+        }
+    }
+
 
     async function getUserTweets(){
 
@@ -188,53 +282,10 @@
                 window.location.href = "/login"
             }
 
-            console.log(data.tweets,"user feed")
+            console.log(data.tweets,"user profile tweets")
 
-            const feedContainer = document.getElementById("feed-container")
-           
-
-
-            for(let i=0;i<data.tweets.userOriginalTweets.length;i++){
-                let tweet = data.tweets.userOriginalTweets[i];
-                 const mediaHtml = tweet.media && tweet.media.length > 0 
-        ? tweet.media.map(item => `
-            <img src="${item}" class="w-full h-auto object-cover border-b border-gray-800 last:border-b-0">
-          `).join('')
-        : '';
-
-                console.log(mediaHtml,"this is media html")
-
-
-                let feedDiv = document.createElement("div")
-                let feedContent = `<article class="p-4 border-b border-gray-800 hover:bg-white/5 transition cursor-pointer">
-                <div class="flex gap-3">
-                   <a href="/profile/${tweet.username}"> <img src="${tweet.profile_photo_url}" class="w-10 h-10 rounded-full bg-gray-700"></a>
-                    <div class="flex-1">
-                        <div class="flex items-center gap-1">
-                            <a href="/profile/${tweet.username}"><span class="font-bold hover:underline">${tweet.username}</span></a>
-                            <span class="text-gray-500">@${tweet.username}· 6h</span>
-                        </div>
-                        <a href="/tweet/${tweet.tweet_id}">
-                        <p class="mt-1 mb-3">${tweet.tweet_content}</p>
-                        <div class="rounded-2xl border border-gray-800 overflow-hidden">
-                            <div class="rounded-2xl border border-gray-800 overflow-hidden flex flex-col">
-                        ${mediaHtml}
-                    </div>
-                        </div>
-                        </a>
-                        <!-- Post Actions -->
-                        <div class="flex justify-between mt-4 text-gray-500 max-w-md">
-                            <div class="flex items-center gap-2 group"><span class="p-2 rounded-full group-hover:bg-blue-500/10 group-hover:text-blue-500">💬</span> ${tweet.reply_count}</div>
-                            <div class="flex items-center gap-2 group"><span class="p-2 rounded-full group-hover:bg-green-500/10 group-hover:text-green-500">🔁</span> ${tweet.retweet_count}</div>
-                            <div class="flex items-center gap-2 group"><span class="p-2 rounded-full group-hover:bg-pink-500/10 group-hover:text-pink-500">❤️</span> ${tweet.like_count}</div>
-                            <div class="flex items-center gap-2 group"><span class="p-2 rounded-full group-hover:bg-blue-500/10 group-hover:text-blue-500">📊</span> 418k</div>
-                        </div>
-                    </div>
-                </div>
-            </article>`
-            feedDiv.innerHTML = feedContent
-            feedContainer.append(feedDiv)
-            }
+            profileTweetsData = data.tweets
+            renderPostsTab()
 
 
 
@@ -242,6 +293,85 @@
         }
 
         getUserTweets();
+
+        async function retweet(event, tweetId) {
+            event.stopPropagation();
+            event.preventDefault();
+
+            const res = await fetch("/api/tweet/retweet", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    authorization: `Bearer ${localStorage.getItem("accessToken")}`
+                },
+                body: JSON.stringify({ tweet_id: tweetId })
+            })
+
+            const data = await res.json();
+
+            if (data.error) {
+                alert(data.error)
+                return
+            }
+
+            const retweetDeleted = data.message === "retweet deleted"
+
+            document.querySelectorAll(`[data-retweet-action="${tweetId}"]`).forEach((retweetAction) => {
+                retweetAction.classList.toggle("text-green-500", !retweetDeleted)
+                retweetAction.style.color = retweetDeleted ? "" : "#22c55e"
+            })
+
+            document.querySelectorAll(`[data-retweet-count="${tweetId}"]`).forEach((retweetCount) => {
+                const currentCount = Number(retweetCount.innerText) || 0
+                retweetCount.innerText = retweetDeleted ? Math.max(currentCount - 1, 0) : currentCount + 1
+            })
+        }
+
+        async function likeTweet(event, tweetId) {
+            event.stopPropagation();
+            event.preventDefault();
+
+            const res = await fetch(`/api/tweet/like-unlike-tweet/${tweetId}`, {
+                method: "POST",
+                headers: {
+                    authorization: `Bearer ${localStorage.getItem("accessToken")}`
+                },
+            })
+
+            const data = await res.json();
+            console.log(data, "liked unliked data!!!")
+
+            const likeData = data.data?.data || data.data?.[0] || data.data || data;
+            const likedValue = likeData.is_liked ?? likeData.liked ?? likeData.likedStatus;
+            const countValue = likeData.like_count ?? likeData.likes_count ?? likeData.likes;
+
+            if (likedValue !== undefined && countValue !== undefined) {
+                const isLiked = likedValue === true || likedValue === 1 || likedValue === "1" || likedValue === "true";
+                const likedColor = isLiked ? "#ec4899" : "";
+
+                document.querySelectorAll(`[data-like-action="${tweetId}"]`).forEach((likeAction) => {
+                    likeAction.classList.toggle("text-pink-500", isLiked);
+                    likeAction.style.color = likedColor;
+                })
+
+                document.querySelectorAll(`[data-like-button="${tweetId}"]`).forEach((likeButton) => {
+                    const likeWrapper = likeButton.parentElement;
+                    likeButton.classList.toggle("text-pink-500", isLiked);
+                    likeButton.style.color = likedColor;
+
+                    if (likeWrapper) {
+                        likeWrapper.classList.toggle("text-pink-500", isLiked);
+                        likeWrapper.style.color = likedColor;
+                    }
+                })
+
+                document.querySelectorAll(`[data-like-count="${tweetId}"]`).forEach((likeCount) => {
+                    likeCount.innerText = countValue;
+                    likeCount.classList.toggle("text-pink-500", isLiked);
+                    likeCount.style.color = likedColor;
+                })
+            }
+        }
 
     </script>
 

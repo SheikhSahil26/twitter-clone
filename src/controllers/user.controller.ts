@@ -42,12 +42,13 @@ export class UserControllers {
     async getUserTweetsByUsername(req:Request,res:Response){
         try {
             const username = req.params.username as string
+            const viewerId = (req as any).user.payload.id
             
             const userData:any = await userService.getUserProfile(username)
 
             const userId = userData.data.id
             
-            const resp :any = await userService.getUserTweets(userId);
+            const resp :any = await userService.getUserTweets(userId, viewerId);
 
 
             if (!resp.success) {
@@ -119,6 +120,7 @@ export class UserControllers {
 
             return res.status(resp.statusCode).json({
                 message: resp.message,
+                is_followed: resp.message === "followed user",
                 
             })
 
@@ -138,26 +140,38 @@ export class UserControllers {
 
     }
     async updateProfile(req: Request, res: Response) {
-        const userId = (req as any).user.payload.id
-        const updateBody = req.body
+        try {
+            const userId = (req as any).user.payload.id
+            const updateBody = req.body
 
-        const files: any = req.files as { [fieldname: string]: Express.Multer.File[] };
+            const files: any = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
 
-        console.log(files, "These are the files object");
+            console.log(files, "These are the files object");
 
-        const profile_photo_url = files.profile_photo_url[0].path || null;
+            if (files?.profile_photo_url?.[0]) {
+                updateBody.profile_photo_url = `/uploads/${files.profile_photo_url[0].filename}`
+            }
 
-        const cover_image_url = files.cover_image_url[0].path || null;
+            if (files?.cover_image_url?.[0]) {
+                updateBody.cover_image_url = `/uploads/${files.cover_image_url[0].filename}`;
+            }
 
-        updateBody.profile_photo_url = `/uploads/${files.profile_photo_url[0].filename}`
-        updateBody.cover_image_url = `/uploads/${files.cover_image_url[0].filename}`;
+            const resp = await userService.updateProfile(userId, updateBody);
 
-        const resp = await userService.updateProfile(userId, updateBody);
+            if (resp && !resp.success) {
+                return res.status(resp.statusCode || 500).json({
+                    error: resp.error
+                })
+            }
 
-
-        return res.status(200).json({
-            message:"profile updated successfully",
-        })
+            return res.status(200).json({
+                message:"profile updated successfully",
+            })
+        } catch (err) {
+            return res.status(500).json({
+                error: "internal server error",
+            })
+        }
 
 
     }
@@ -317,12 +331,13 @@ export class UserControllers {
     async getFollowersByUsername(req:Request,res:Response){
           try{
             const username = req.params.username as string
+            const viewerId = (req as any).user.payload.id
     
             const userData:any = await userService.getUserProfile(username)
 
             const userId = userData.data.id;
 
-            const resp :any = await userService.getUserFollowers(userId)
+            const resp :any = await userService.getUserFollowers(userId, viewerId)
     
              if(!resp.success){
                     return res.status(resp.statusCode).json({
@@ -345,12 +360,13 @@ export class UserControllers {
     async getFollowingsByUsername(req:Request,res:Response){
         try{
             const username = req.params.username as string
+            const viewerId = (req as any).user.payload.id
     
             const userData:any = await userService.getUserProfile(username)
 
             const userId = userData.data.id;
 
-            const resp :any = await userService.getUserFollowings(userId)
+            const resp :any = await userService.getUserFollowings(userId, viewerId)
 
     
              if(!resp.success){

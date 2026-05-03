@@ -28,7 +28,7 @@ export class UserRepository {
 
 
   //this shows the users tweets/retweets/replies also in his/her profile page...
-  static async getUserTweets(userId: number): Promise<[]> {
+  static async getUserTweets(userId: number, viewerId: number = userId): Promise<[]> {
     //A single Tweet comprises of (tweet_content,tweet_id,likes,replies,username of who tweeted,tweeted_by id) 
     //so here to fetch tweet we need to fetch from 3 tables users,tweets,tweet_likes(count only),media table also;
 
@@ -54,7 +54,7 @@ FROM tweets t
 JOIN users u ON t.tweeted_by = u.id
 LEFT JOIN media m ON t.tweet_id = m.tweet_id
 WHERE t.tweeted_by = ? and t.original_tweet_id is null and t.parent_tweet_id is null
-ORDER BY t.created_at DESC; `, [userId,userId]
+ORDER BY t.created_at DESC; `, [viewerId,userId]
     )
 
     console.log(query.length, "user tweets for profile!!!");
@@ -63,7 +63,7 @@ ORDER BY t.created_at DESC; `, [userId,userId]
 
     return query as [];
   }
-  static async getUserRetweets(userId: number): Promise<[]> {
+  static async getUserRetweets(userId: number, viewerId: number = userId): Promise<[]> {
     //A single Tweet comprises of (tweet_content,tweet_id,likes,replies,username of who tweeted,tweeted_by id) 
     //so here to fetch tweet we need to fetch from 3 tables users,tweets,tweet_likes(count only),media table also;
 
@@ -87,9 +87,9 @@ ORDER BY t.created_at DESC; `, [userId,userId]
     ) AS is_liked
 FROM tweets t
 JOIN users u ON t.tweeted_by = u.id
-LEFT JOIN media m ON t.tweet_id = m.tweet_id
+LEFT JOIN media m ON t.original_tweet_id = m.tweet_id
 WHERE t.tweeted_by = ? and t.original_tweet_id is not null
-ORDER BY t.created_at DESC; `, [userId,userId]
+ORDER BY t.created_at DESC; `, [viewerId,userId]
     )
 
     console.log(query.length, "user tweets for profile!!!");
@@ -98,7 +98,7 @@ ORDER BY t.created_at DESC; `, [userId,userId]
 
     return query as [];
   }
-  static async getUserReplies(userId: number): Promise<[]> {
+  static async getUserReplies(userId: number, viewerId: number = userId): Promise<[]> {
     //A single Tweet comprises of (tweet_content,tweet_id,likes,replies,username of who tweeted,tweeted_by id) 
     //so here to fetch tweet we need to fetch from 3 tables users,tweets,tweet_likes(count only),media table also;
 
@@ -124,7 +124,7 @@ FROM tweets t
 JOIN users u ON t.tweeted_by = u.id
 LEFT JOIN media m ON t.tweet_id = m.tweet_id
 WHERE t.tweeted_by = ? and t.parent_tweet_id is not null
-ORDER BY t.created_at DESC;`, [userId,userId]
+ORDER BY t.created_at DESC;`, [viewerId,userId]
     )
 
     console.log(query.length, "user tweets for profile!!!");
@@ -140,31 +140,7 @@ ORDER BY t.created_at DESC;`, [userId,userId]
   static async getUserFeed(userId:number):Promise<[]>{
     try{
       const [query] = await db.execute<RowDataPacket[]>(
-        `SELECT 
-    t.tweet_id,
-    t.tweet_content,
-    t.tweeted_by,
-    t.created_at,
-    t.parent_tweet_id,
-    t.original_tweet_id,
-    u.username,
-    u.profile_photo_url,
-    m.tweet_content_url,
-    (SELECT COUNT(*) FROM tweet_likes tl WHERE tl.tweet_id = t.tweet_id) AS like_count,
-    (select count(*) from tweets where t.original_tweet_id is not null) as retweet_count,
-    (select count(*) from tweets where t.parent_tweet_id is not null) as reply_count,
-    EXISTS (
-        SELECT 1 FROM tweet_likes 
-        WHERE tweet_id = t.tweet_id AND liked_by = ?
-    ) AS is_liked
-FROM tweets t
-JOIN users u ON t.tweeted_by = u.id
-LEFT JOIN media m ON t.tweet_id = m.tweet_id
-WHERE (
-    t.tweeted_by IN (SELECT to_follow_id FROM connections WHERE followee_id = ?) 
-)
-
-ORDER BY t.created_at DESC;
+        `SELECT t.tweet_id, t.tweet_content, t.tweeted_by, t.created_at, t.parent_tweet_id, t.original_tweet_id, u.username, u.profile_photo_url, m.tweet_content_url, (SELECT COUNT(*) FROM tweet_likes tl WHERE tl.tweet_id = t.tweet_id) AS like_count, (select count(*) from tweets where t.original_tweet_id is not null) as retweet_count, (select count(*) from tweets where t.parent_tweet_id is not null) as reply_count, EXISTS ( SELECT 1 FROM tweet_likes WHERE tweet_id = t.tweet_id AND liked_by = ? ) AS is_liked FROM tweets t JOIN users u ON t.tweeted_by = u.id LEFT JOIN media m ON t.tweet_id = m.tweet_id WHERE ( t.tweeted_by IN (SELECT to_follow_id FROM connections WHERE followee_id = ?) ) ORDER BY t.created_at DESC;
  `,[userId,userId]
       )
 
@@ -178,10 +154,15 @@ ORDER BY t.created_at DESC;
     }
 
   }
-  static async getUserFollowers(userId:number):Promise<[]>{
+  static async getUserFollowers(userId:number, viewerId: number = userId):Promise<[]>{
     try{
       const [query]:any = await db.execute<RowDataPacket[]>(
-        `select id,profile_photo_url,username,f_name,l_name from users where id in (select followee_id from connections where to_follow_id =?)`,[userId]
+        `select id,profile_photo_url,username,f_name,l_name,
+        EXISTS (
+          SELECT 1 FROM connections
+          WHERE followee_id = ? AND to_follow_id = users.id
+        ) AS is_followed
+        from users where id in (select followee_id from connections where to_follow_id =?)`,[viewerId,userId]
       )
 
       console.log(query);
@@ -192,10 +173,15 @@ ORDER BY t.created_at DESC;
       throw new Error("DB_ERR while fethcing followers")
     }
   }
-  static async getUserFollowings(userId:number):Promise<[]>{
+  static async getUserFollowings(userId:number, viewerId: number = userId):Promise<[]>{
     try{
       const [query]:any = await db.execute<RowDataPacket[]>(
-        `select id,profile_photo_url,username,f_name,l_name from users where id in (select to_follow_id from connections where followee_id =?)`,[userId]
+        `select id,profile_photo_url,username,f_name,l_name,
+        EXISTS (
+          SELECT 1 FROM connections
+          WHERE followee_id = ? AND to_follow_id = users.id
+        ) AS is_followed
+        from users where id in (select to_follow_id from connections where followee_id =?)`,[viewerId,userId]
       )
 
       console.log(query,"followings of user");
@@ -272,7 +258,12 @@ ORDER BY t.created_at DESC;
     
     try{
       const [query]:any = await db.execute<RowDataPacket[]>(
-        `select id,profile_photo_url,username,f_name,l_name from users where id<>? `,[userId]
+        `select id,profile_photo_url,username,f_name,l_name,
+        EXISTS (
+          SELECT 1 FROM connections
+          WHERE followee_id = ? AND to_follow_id = users.id
+        ) AS is_followed
+        from users where id<>? `,[userId,userId]
       )
 
       console.log(query,"all users except logged in");

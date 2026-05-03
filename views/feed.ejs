@@ -84,7 +84,7 @@
                     <path d="M23 3l-6.62 6.62L3 3l6.62 6.62L3 21l6.62-6.62L21 21l-6.62-6.62L23 3z" />
                 </svg></button>
 
-                  <button id="logout"
+            <button id="logout"
                 class="bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white font-bold py-3 mt-4 rounded-full w-full hidden xl:block">Logout</button>
             <button id="post-btn-small" class="bg-[#1d9bf0] p-3 mt-4 rounded-full xl:hidden"><svg
                     class="w-6 h-6 fill-white" viewBox="0 0 24 24">
@@ -92,7 +92,7 @@
                 </svg></button>
 
             <!-- Profile Section -->
-           
+
 
         </aside>
 
@@ -164,10 +164,11 @@
 
             <!-- Subscribe Card -->
             <section class="bg-[#16181c] rounded-2xl p-4 border border-gray-800">
-                <h2  class="text-xl font-extrabold mb-2">Subscribe to Premium</h2>
+                <h2 class="text-xl font-extrabold mb-2">Subscribe to Premium</h2>
                 <p class="text-[15px] font-medium leading-5 mb-3">Subscribe to unlock new features and if eligible,
                     receive a share of revenue.</p>
-                <button id="subscribeBtn" class="bg-[#1d9bf0] text-white font-bold px-4 py-1.5 rounded-full">Subscribe</button>
+                <button id="subscribeBtn"
+                    class="bg-[#1d9bf0] text-white font-bold px-4 py-1.5 rounded-full">Subscribe</button>
             </section>
 
             <!-- Trends Section -->
@@ -237,17 +238,65 @@
 
 <script>
 
-    const logout= document.getElementById("logout")
+   
 
-    logout.addEventListener("click",logout)
+    
 
-    async function logout(){
-        const logout = await 
+
+
+    const logoutBtn = document.getElementById("logout")
+
+    logoutBtn.addEventListener("click", logoutUser)
+
+    async function logoutUser() {
+        try {
+            const res = await fetch("/api/auth/logout", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "authorization": `Bearer ${localStorage.getItem("accessToken")}`
+                }
+            })
+
+            const data = await res.json()
+
+            if (!res.ok) {
+                alert(data.error || "Logout failed")
+                return
+            }
+
+            localStorage.removeItem("accessToken")
+            window.location.href = "/login"
+        } catch (err) {
+            alert("Something went wrong while logging out")
+        }
     }
 
 
 
     const feedContainer = document.getElementById("feed-container")
+
+     //timezone conversion 
+     
+  function convertToLocalTime(utcTime) {
+    const date = new Date(utcTime); // SQL timestamp (UTC)
+    return date.toLocaleString();   // converts to user's local timezone
+  }
+
+  // Example usage:
+  const created_at = "2026-05-03T10:30:00Z"; // from DB
+
+  function timeAgo(utcTime) {
+    const now = new Date();
+    const past = new Date(utcTime);
+    const diff = Math.floor((now - past) / 1000);
+
+    if (diff < 60) return "Just now";
+    if (diff < 3600) return Math.floor(diff / 60) + "m";
+    if (diff < 86400) return Math.floor(diff / 3600) + "h";
+    return Math.floor(diff / 86400) + "d";
+  }
+
 
     async function getUserFeed() {
 
@@ -270,10 +319,6 @@
         console.log(data.feed, "user feed")
 
 
-
-
-
-
         for (let i = 0; i < data.feed.length; i++) {
             let tweet = data.feed[i];
             const mediaHtml = tweet.media && tweet.media.length > 0
@@ -284,6 +329,8 @@
 
             console.log(mediaHtml, "this is media html")
 
+            const isLiked = Boolean(Number(tweet.is_liked));
+            const likeColorClass = isLiked ? "text-pink-500" : "";
 
             let feedDiv = document.createElement("div")
             let feedContent = `<article class="p-4 border-b border-gray-800 hover:bg-white/5 transition cursor-pointer">
@@ -292,7 +339,9 @@
                     <div class="flex-1">
                         <div class="flex items-center gap-1">
                             <a href="/profile/${data.feed[i].username}"><span class="font-bold hover:underline">${data.feed[i].username}</span></a>
-                            <span class="text-gray-500">@${data.feed[i].username}· 6h</span>
+                         <span class="text-gray-500">
+  @${data.feed[i].username} · ${timeAgo(data.feed[i].created_at)}
+</span>
                         </div>
                         <a href="/tweet/${data.feed[i].tweet_id}">
                         <p class="mt-1 mb-3">${data.feed[i].tweet_content}</p>
@@ -301,12 +350,13 @@
                         ${mediaHtml}
                     </div>
                         </div>
-                        </a>
+                       
                         <!-- Post Actions -->
                         <div class="flex justify-between mt-4 text-gray-500 max-w-md">
                             <div class="flex items-center gap-2 group"><span onclick="replyToTweet(${tweet.tweet_id})" class="p-2 rounded-full group-hover:bg-blue-500/10 group-hover:text-blue-500">💬</span> ${data.feed[i].reply_count}</div>
-                            <div class="flex items-center gap-2 group"><span onclick="retweet(${tweet.tweet_id})" class="p-2 rounded-full group-hover:bg-green-500/10 group-hover:text-green-500">🔁</span> ${data.feed[i].retweet_count}</div>
-                            <div class="flex items-center gap-2 group"><span onclick="likeTweet(${tweet.tweet_id})" class="p-2 rounded-full group-hover:bg-pink-500/10 group-hover:text-pink-500">❤️</span> ${data.feed[i].like_count}</div>
+                             </a>
+                            <div data-retweet-action="${tweet.tweet_id}" class="flex items-center gap-2 group"><span onclick="retweet(event, ${tweet.tweet_id})" class="p-2 rounded-full group-hover:bg-green-500/10 group-hover:text-green-500">🔁</span> <span data-retweet-count="${tweet.tweet_id}">${data.feed[i].retweet_count}</span></div>
+                            <div data-like-action="${tweet.tweet_id}" class="flex items-center gap-2 group ${likeColorClass}" style="${isLiked ? 'color:#ec4899;' : ''}"><span onclick="likeTweet(event, ${tweet.tweet_id})" data-like-button="${tweet.tweet_id}" class="p-2 rounded-full cursor-pointer group-hover:bg-pink-500/10 group-hover:text-pink-500" style="${isLiked ? 'color:#ec4899;' : ''}">❤️</span> <span data-like-count="${tweet.tweet_id}" style="${isLiked ? 'color:#ec4899;' : ''}">${data.feed[i].like_count}</span></div>
                             <div class="flex items-center gap-2 group"><span class="p-2 rounded-full group-hover:bg-blue-500/10 group-hover:text-blue-500">📊</span> 418k</div>
                         </div>
                     </div>
@@ -322,6 +372,39 @@
     }
 
     getUserFeed();
+
+    async function retweet(event, tweetId) {
+        event.stopPropagation();
+        event.preventDefault();
+
+        const res = await fetch("/api/tweet/retweet", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                authorization: `Bearer ${localStorage.getItem("accessToken")}`
+            },
+            body: JSON.stringify({ tweet_id: tweetId })
+        })
+
+        const data = await res.json();
+
+        if (data.error) {
+            alert(data.error)
+            return
+        }
+
+        const retweetDeleted = data.message === "retweet deleted"
+
+        document.querySelectorAll(`[data-retweet-action="${tweetId}"]`).forEach((retweetAction) => {
+            retweetAction.classList.toggle("text-green-500", !retweetDeleted)
+            retweetAction.style.color = retweetDeleted ? "" : "#22c55e"
+        })
+
+        document.querySelectorAll(`[data-retweet-count="${tweetId}"]`).forEach((retweetCount) => {
+            const currentCount = Number(retweetCount.innerText) || 0
+            retweetCount.innerText = retweetDeleted ? Math.max(currentCount - 1, 0) : currentCount + 1
+        })
+    }
 
     const postBtnLarge = document.getElementById('post-btn-large');
     const postBtnSmall = document.getElementById('post-btn-small');
@@ -402,10 +485,10 @@
         const res = await fetch("/api/tweet/create-tweet", {
             method: "POST",
             headers: {
-                
+
                 "authorization": `Bearer ${localStorage.getItem("accessToken")}`
             },
-            
+
             body: formData
         });
 
@@ -441,6 +524,7 @@
         let allUsers = data.allUsers
 
         for (let i = 0; i < allUsers.length; i++) {
+            const isFollowed = Boolean(Number(allUsers[i].is_followed));
             let suggestedDiv = document.createElement("div")
             const suggestedUser = `
               <div class="mt-auto mb-4 flex items-center gap-3 p-3 rounded-full hover:bg-white/10 cursor-pointer">
@@ -452,7 +536,7 @@
                 <p class="text-gray-500 text-[15px]">@${allUsers[i].username}</p>
             </div>
             </a>
-            <div class="ml-auto hidden xl:block"><button type="button" id="follow-btn-${i}" onclick="followUnfollow('${allUsers[i].username}',${i})">follow</button></div>
+            <div class="ml-auto hidden xl:block"><button type="button" id="follow-btn-${i}" onclick="followUnfollow('${allUsers[i].username}',${i})">${isFollowed ? "unfollow" : "follow"}</button></div>
         </div>
          
         `
@@ -464,9 +548,9 @@
 
     getAllUsers();
 
-    async function followUnfollow(username,idx){
+    async function followUnfollow(username, idx) {
         console.log(username)
-      const res = await fetch(`/api/user/follow-unfollow-user/${username}`, {
+        const res = await fetch(`/api/user/follow-unfollow-user/${username}`, {
             method: "POST",
             headers: {
                 authorization: `Bearer ${localStorage.getItem("accessToken")}`
@@ -478,11 +562,8 @@
         const data = await res.json();
         console.log(data, "follow unfollow status")
 
-        if(data.message==="followed user"){
-            followBtn.innerText = "unfollow"
-        }
-        else if(data.message==="unfollowed user"){
-            followBtn.innerText = "follow"
+        if (data.is_followed !== undefined) {
+            followBtn.innerText = data.is_followed ? "unfollow" : "follow"
         }
 
 
@@ -492,22 +573,55 @@
 
 
 
- async function likeTweet(tweetId){
-            console.log(tweetId)
-            const res = await fetch(`/api/tweet/like-unlike-tweet/${tweetId}`,{
-                method:"POST",
-                headers:{
-                    authorization:`Bearer ${localStorage.getItem("accessToken")}`
-                },
-               
+    async function likeTweet(event, tweetId) {
+        event.stopPropagation();
+        event.preventDefault();
+        console.log(tweetId)
+        const res = await fetch(`/api/tweet/like-unlike-tweet/${tweetId}`, {
+            method: "POST",
+            headers: {
+                authorization: `Bearer ${localStorage.getItem("accessToken")}`
+            },
+
+        })
+
+        const data1 = await res.json();
+
+        console.log(data1, "liked unliked data!!!")
+
+        const likeData = data1.data?.data || data1.data?.[0] || data1.data || data1;
+        const likedValue = likeData.is_liked ?? likeData.liked ?? likeData.likedStatus;
+        const countValue = likeData.like_count ?? likeData.likes_count ?? likeData.likes;
+
+        if (likedValue !== undefined && countValue !== undefined) {
+            const isLiked = likedValue === true || likedValue === 1 || likedValue === "1" || likedValue === "true";
+            const likedColor = isLiked ? "#ec4899" : "";
+
+            document.querySelectorAll(`[data-like-action="${tweetId}"]`).forEach((likeAction) => {
+                likeAction.classList.toggle("text-pink-500", isLiked);
+                likeAction.style.color = likedColor;
             })
 
-            const data = await res.json();
+            document.querySelectorAll(`[data-like-button="${tweetId}"]`).forEach((likeButton) => {
+                const likeWrapper = likeButton.parentElement;
+                likeButton.classList.toggle("text-pink-500", isLiked);
+                likeButton.style.color = likedColor;
 
-            console.log(data,"liked unliked data!!!")
+                if (likeWrapper) {
+                    likeWrapper.classList.toggle("text-pink-500", isLiked);
+                    likeWrapper.style.color = likedColor;
+                }
+            })
 
-
+            document.querySelectorAll(`[data-like-count="${tweetId}"]`).forEach((likeCount) => {
+                likeCount.innerText = countValue;
+                likeCount.classList.toggle("text-pink-500", isLiked);
+                likeCount.style.color = likedColor;
+            })
         }
+
+
+    }
 
 
 
@@ -515,7 +629,7 @@
 
     let subscribeBtn = document.getElementById("subscribeBtn")
 
-    subscribeBtn.addEventListener("click",()=>{
+    subscribeBtn.addEventListener("click", () => {
         alert("lawde tera ghar jainga isme!!!")
     })
 

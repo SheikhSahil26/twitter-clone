@@ -79,7 +79,7 @@ export class TweetService {
             return {
                 success: true,
                 data: likedStatus,
-                message: likedStatus ? "liked your tweet" : "unliked the tweet",
+                message: likedStatus.is_liked ? "liked your tweet" : "unliked the tweet",
                 statusCode: 200
             }
 
@@ -119,9 +119,9 @@ export class TweetService {
     }
 
 
-    async getTweetById(tweetId:number){
-        const tweet = await TweetRepository.getTweetById(tweetId);
-        const tweetReplies = await TweetRepository.getRepliesById(tweetId)
+    async getTweetById(tweetId:number,userId:number){
+        const tweet = await TweetRepository.getTweetById(tweetId,userId);
+        const tweetReplies = await TweetRepository.getRepliesById(tweetId,userId)
 
         console.log(tweet,tweetReplies)
 

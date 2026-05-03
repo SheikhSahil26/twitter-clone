@@ -94,7 +94,13 @@ export class UserService {
 
             console.log(updateData, "update body")
 
-            await UserRepository.updateProfile(updateBody, userId);
+            await UserRepository.updateProfile(updateData, userId);
+
+            return {
+                success: true,
+                message: "profile updated successfully",
+                statusCode: 200,
+            }
 
         }
         catch {
@@ -105,15 +111,15 @@ export class UserService {
             }
         }
     }
-    async getUserTweets(userId: number) {
+    async getUserTweets(userId: number, viewerId: number = userId) {
         try {
-            const userOriginalTweets: any = await UserRepository.getUserTweets(userId);
+            const userOriginalTweets: any = await UserRepository.getUserTweets(userId, viewerId);
 
             console.log(userOriginalTweets, "tweets original in service")
 
-            let userRetweets: any = await UserRepository.getUserRetweets(userId);
+            let userRetweets: any = await UserRepository.getUserRetweets(userId, viewerId);
 
-            let userReplies: any = await UserRepository.getUserReplies(userId);
+            let userReplies: any = await UserRepository.getUserReplies(userId, viewerId);
 
             //i am differentiating this here in thsi service to show in frontned that this are the retweets and original by the user...
 
@@ -173,9 +179,9 @@ export class UserService {
 
 
     }
-    async getUserFollowers(userId: number) {
+    async getUserFollowers(userId: number, viewerId: number = userId) {
         try {
-            const followers = await UserRepository.getUserFollowers(userId);
+            const followers = await UserRepository.getUserFollowers(userId, viewerId);
 
             return {
                 success: true,
@@ -196,9 +202,9 @@ export class UserService {
 
 
     }
-    async getUserFollowings(userId: number) {
+    async getUserFollowings(userId: number, viewerId: number = userId) {
         try {
-            const followings = await UserRepository.getUserFollowings(userId);
+            const followings = await UserRepository.getUserFollowings(userId, viewerId);
 
             return {
                 success: true,

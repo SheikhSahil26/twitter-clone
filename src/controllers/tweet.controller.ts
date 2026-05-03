@@ -65,10 +65,18 @@ export class TweetControllers {
             const tweetId = req.body.tweet_id;
             const userId = (req as any).user.payload.id; // id of user who is retweeting!!;
 
-            const insertedId = await tweetService.reTweet(tweetId,userId)
+            const resp = await tweetService.reTweet(tweetId,userId)
 
-            
+            if(!resp.success){
+                return res.status(resp.statusCode).json({
+                    error:resp.message,
+                })
+            }
 
+            return res.status(resp.statusCode).json({
+                message:resp.message,
+                data:resp.data,
+            })
 
         }catch(err){
             return res.status(500).json({
@@ -83,6 +91,7 @@ export class TweetControllers {
              const userId = (req as any).user.payload.id
         const resp :any = await tweetService.likeUnlikeTweet(tweetId,userId)
 
+        console.log(resp.data)
         console.log("reached like contorller")
         if(!resp.success){
             return res.status(resp.statusCode).json({
@@ -91,7 +100,8 @@ export class TweetControllers {
         }
 
         return res.status(resp.statusCode).json({
-            message:resp.message
+            message:resp.message,
+            data:resp.data
         })
 
 
@@ -160,9 +170,10 @@ export class TweetControllers {
     async getTweetById(req:Request,res:Response){
 
         const tweetId = Number(req.params.tweetId)
+        const userId = (req as any).user.payload.id
         console.log(tweetId)
 
-        const resp = await tweetService.getTweetById(tweetId);
+        const resp = await tweetService.getTweetById(tweetId,userId);
        
         
         console.log(resp.data,"controller")
