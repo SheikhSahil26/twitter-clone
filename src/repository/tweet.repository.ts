@@ -96,7 +96,7 @@ export class TweetRepository {
     }
 
 
-    static async likeUnlikeTweet(tweetId: number, userId: number): Promise<Boolean> {
+    static async likeUnlikeTweet(tweetId: number, userId: number): Promise<{ is_liked: boolean; like_count: number }> {
 
         try {
             const [query] = await db.execute<RowDataPacket[]>(
@@ -107,12 +107,26 @@ export class TweetRepository {
             if (query.length > 0) {
                 const [delQuery] = await db.execute<ResultSetHeader>(`delete from tweet_likes where liked_by=? and tweet_id=?`, [userId,tweetId])
 
-                return false;
+                const [countQuery] = await db.execute<RowDataPacket[]>(
+                    `select count(*) as like_count from tweet_likes where tweet_id=?`, [tweetId]
+                )
+
+                return {
+                    is_liked: false,
+                    like_count: Number(countQuery[0]?.like_count ?? 0)
+                };
             }
 
             else {
                 const [result] = await db.execute<ResultSetHeader>(`insert into tweet_likes (liked_by,tweet_id) values (?,?)`, [userId, tweetId]);
-                return true;
+                const [countQuery] = await db.execute<RowDataPacket[]>(
+                    `select count(*) as like_count from tweet_likes where tweet_id=?`, [tweetId]
+                )
+
+                return {
+                    is_liked: true,
+                    like_count: Number(countQuery[0]?.like_count ?? 0)
+                };
             }
 
         } catch (err) {
@@ -177,7 +191,7 @@ export class TweetRepository {
     }
 
     //tweet with media
-    static async getTweetById(tweetId:number){
+    static async getTweetById(tweetId:number,userId:number){
         console.log(tweetId,"tweet id")
         const [query] = await db.execute<RowDataPacket[]>(
             `SELECT 
@@ -189,12 +203,16 @@ export class TweetRepository {
     m.tweet_content_url,
     (SELECT COUNT(*) FROM tweet_likes WHERE tweet_id = t.tweet_id) as like_count,
     (SELECT COUNT(*) FROM tweets WHERE parent_tweet_id = t.tweet_id) as reply_count,
-    (SELECT COUNT(*) FROM tweets WHERE original_tweet_id = t.tweet_id) as retweet_count
+    (SELECT COUNT(*) FROM tweets WHERE original_tweet_id = t.tweet_id) as retweet_count,
+    EXISTS (
+        SELECT 1 FROM tweet_likes
+        WHERE tweet_id = t.tweet_id AND liked_by = ?
+    ) AS is_liked
 FROM tweets t
 LEFT JOIN users u ON t.tweeted_by = u.id
 LEFT JOIN media m ON t.tweet_id = m.tweet_id
 WHERE t.tweet_id = ?;
-`,[tweetId]
+`,[userId,tweetId]
         )
 
         console.log(query,"tweet by id")
@@ -204,7 +222,7 @@ WHERE t.tweet_id = ?;
 
     }
 
-    static async getRepliesById(tweetId:number){
+    static async getRepliesById(tweetId:number,userId:number){
         const [query] = await db.execute<RowDataPacket[]>(
             `SELECT 
     t.tweet_id,
@@ -215,13 +233,17 @@ WHERE t.tweet_id = ?;
     m.tweet_content_url,
      (SELECT COUNT(*) FROM tweet_likes WHERE tweet_id = t.tweet_id) as like_count,
     (SELECT COUNT(*) FROM tweets WHERE parent_tweet_id = t.tweet_id) as reply_count,
-    (SELECT COUNT(*) FROM tweets WHERE original_tweet_id = t.tweet_id) as retweet_count
+    (SELECT COUNT(*) FROM tweets WHERE original_tweet_id = t.tweet_id) as retweet_count,
+    EXISTS (
+        SELECT 1 FROM tweet_likes
+        WHERE tweet_id = t.tweet_id AND liked_by = ?
+    ) AS is_liked
 FROM tweets t
 JOIN users u ON t.tweeted_by = u.id
 LEFT JOIN media m ON t.tweet_id = m.tweet_id
 WHERE t.parent_tweet_id = ? 
 ORDER BY t.created_at ASC; 
-`,[tweetId]
+`,[userId,tweetId]
         )
 
         console.log(query,"tweet by id")
