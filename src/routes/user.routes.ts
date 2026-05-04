@@ -36,5 +36,6 @@ router.get("/get-user-followings",protectedRoutes,userControllers.getUserFollowi
 
 router.get("/get-all-users",protectedRoutes,userControllers.fetchAllUsers)
 
+router.get("/search",protectedRoutes,userControllers.searchUsers)
 
 export default router;

@@ -26,7 +26,8 @@ export async function protectedRoutes(req: Request, res: Response, next: NextFun
     } catch (err: any) {
         console.error("JWT Verification Error:", err.message);
         return res.status(401).json({ 
-            error: err.name === "TokenExpiredError" ? "Token expired" : "Invalid token" 
+            error: err.name === "TokenExpiredError" ? "Token expired" : "Invalid token" ,
+            statusCode : 401
         });
     }
 }

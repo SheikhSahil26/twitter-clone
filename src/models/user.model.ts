@@ -11,7 +11,7 @@ export interface UserInput{
     f_name :string,
     l_name :string,
     captcha ?: string,
-    remember ?:boolean,
+    rememberMe ?:boolean,
     cover_image ?: string,
     profile_photo_url ?: string,
     dob : Date,

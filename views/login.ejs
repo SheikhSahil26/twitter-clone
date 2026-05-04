@@ -61,6 +61,8 @@
               Password
             </label>
           </div>
+          <input type="checkbox" id="remember-me" name="rememberMe">
+          <label for="rememberMe">remember me</label>
 
           <!-- Sign In Button -->
           <button type="button" id="btn"
@@ -86,6 +88,10 @@
 
 <script>
 
+  
+
+
+
   const form = document.getElementById("loginForm")
 
   const submitBtn = document.getElementById("btn");
@@ -96,8 +102,15 @@
 
     const data = new FormData(form)
     const values = Object.fromEntries(data.entries())
-    console.log(data)
+    console.log(data);
     console.log(values);
+
+    if(values.rememberMe==="on"){
+      values.rememberMe=true;
+    }
+    else{
+      values.rememberMe=false;
+    }
 
     if (!validateForm()) {
       e.preventDefault();

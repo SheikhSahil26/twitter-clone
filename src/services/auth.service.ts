@@ -11,6 +11,7 @@ import crypto from "crypto";
 import { success } from "zod";
 import { generateOTP } from "../utils/generateOTP.js";
 import { STATUS_CODES } from "http";
+import { UserControllers } from "../controllers/user.controller.js";
 
 
 type ServiceResponse<T> = {
@@ -115,11 +116,6 @@ export class AuthService {
 
                     await AuthRepository.setLockTime(userCredentials.email, lockTime)
 
-
-
-
-
-
                     return {
                         success: false,
                         error: "max login attempts reached",
@@ -135,10 +131,14 @@ export class AuthService {
                     statusCode: 401
                 };
             }
-            //during login we will set both access and refresh token
-            // const refreshToken: any = generateRefreshToken({ id: data[0].id }, userCredentials.remember)
+        
+            const rememberMe = userCredentials.rememberMe ?? false; 
+            console.log(typeof rememberMe,"remember me value")
+            
+            // // during login we will set both access and refresh token
+            // const refreshToken: any = generateRefreshToken({ id: data[0].id }, userCredentials.rememberMe)
 
-            const accessToken = generateAccessToken({ id: data[0].id , username : existingUser[0].username});
+            const accessToken = generateAccessToken({ id: data[0].id , username : existingUser[0].username},rememberMe);
 
 
             return {

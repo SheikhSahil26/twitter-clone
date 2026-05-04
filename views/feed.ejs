@@ -39,7 +39,7 @@
             </div>
 
             <nav class="space-y-1">
-                <a href="#"
+                <a href="/feed"
                     class="flex items-center gap-4 p-3 rounded-full hover:bg-white/10 transition w-fit xl:w-full">
                     <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
                         <path
@@ -56,15 +56,7 @@
                     </svg>
                     <span class="text-xl hidden xl:block">Explore</span>
                 </a>
-                <a href="#"
-                    class="flex items-center gap-4 p-3 rounded-full hover:bg-white/10 transition w-fit xl:w-full">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path
-                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
-                        </path>
-                    </svg>
-                    <span class="text-xl hidden xl:block">Notifications</span>
-                </a>
+            
                 <a href="/profile"
                     class="flex items-center gap-4 p-3 rounded-full hover:bg-white/10 transition w-fit xl:w-full">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -114,7 +106,7 @@
 
             <!-- Post Input Area -->
             <div class="flex gap-4 p-4 border-b border-gray-800">
-                <img src="https://dicebear.com" class="w-10 h-10 rounded-full bg-gray-700">
+                <img id="profile-image" src="https://dicebear.com" class="w-10 h-10 rounded-full bg-gray-700">
                 <div class="flex-1">
                     <textarea id="inline-text"
                         class="w-full bg-transparent text-xl placeholder-gray-500 focus:outline-none resize-none"
@@ -141,7 +133,7 @@
             </div>
         </main>
 
-        <!-- RIGHT SIDEBAR: Trends -->
+      
         <aside class="hidden lg:block w-[350px] p-4 space-y-4">
             <!-- Search -->
             <div class="relative sticky top-2 z-50">
@@ -151,46 +143,16 @@
                         <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
                 </div>
-                <input
+                <!-- search input box -->
+                <input id="search-input"
                     class="w-full bg-[#202327] rounded-full py-3 pl-12 pr-4 focus:outline-none focus:ring-1 focus:ring-[#1d9bf0] focus:bg-black"
                     placeholder="Search">
             </div>
             <div id="follow-suggestion">
-                <h3>suggested</h3>
+                <h3>suggested for you</h3>
 
 
             </div>
-
-
-            <!-- Subscribe Card -->
-            <section class="bg-[#16181c] rounded-2xl p-4 border border-gray-800">
-                <h2 class="text-xl font-extrabold mb-2">Subscribe to Premium</h2>
-                <p class="text-[15px] font-medium leading-5 mb-3">Subscribe to unlock new features and if eligible,
-                    receive a share of revenue.</p>
-                <button id="subscribeBtn"
-                    class="bg-[#1d9bf0] text-white font-bold px-4 py-1.5 rounded-full">Subscribe</button>
-            </section>
-
-            <!-- Trends Section -->
-            <section class="bg-[#16181c] rounded-2xl border border-gray-800 overflow-hidden">
-                <h2 class="text-xl font-extrabold px-4 py-3">Whats Happening</h2>
-
-                <div class="px-4 py-3 hover:bg-white/5 cursor-pointer transition">
-                    <p class="text-xs text-gray-500">Trending in India</p>
-                    <p class="font-bold">#JagannathRathyatra</p>
-                    <p class="text-xs text-gray-500">48.9k posts</p>
-                </div>
-
-                <div class="px-4 py-3 hover:bg-white/5 cursor-pointer transition">
-                    <p class="text-xs text-gray-500">Sports · Trending</p>
-                    <p class="font-bold">#Thala</p>
-                    <p class="text-xs text-gray-500">9,310 posts</p>
-                </div>
-
-                <div class="px-4 py-3 hover:bg-white/5 cursor-pointer transition text-[#1d9bf0]">
-                    Show more
-                </div>
-            </section>
 
         </aside>
 
@@ -236,10 +198,27 @@
 
 </body>
 
+
 <script>
 
-   
+    async function getUserDetails(){
+          const res = await fetch(`/api/user/get-profile-own`, {
+            method: "GET",
+            headers: {
+                authorization: `Bearer ${localStorage.getItem("accessToken")}`
+            }
+        })
 
+        const data = await res.json();
+
+
+        console.log(data, "user profile")
+        const profilePic = document.getElementById("profile-image");
+        profilePic.src = `${data.profileData.profile_photo_url}`
+    }
+
+  
+    getUserDetails();
     
 
 
@@ -277,14 +256,18 @@
     const feedContainer = document.getElementById("feed-container")
 
      //timezone conversion 
+
+    
+
+// 2. Your SQL timestamp (e.g., "2024-05-24 10:00:00")
+
+
+
      
   function convertToLocalTime(utcTime) {
-    const date = new Date(utcTime); // SQL timestamp (UTC)
-    return date.toLocaleString();   // converts to user's local timezone
+    const date = new Date(utcTime); 
+    return date.toLocaleString();   
   }
-
-  // Example usage:
-  const created_at = "2026-05-03T10:30:00Z"; // from DB
 
   function timeAgo(utcTime) {
     const now = new Date();
@@ -296,6 +279,8 @@
     if (diff < 86400) return Math.floor(diff / 3600) + "h";
     return Math.floor(diff / 86400) + "d";
   }
+
+  //generate new accesstoken using the refreshToken
 
 
     async function getUserFeed() {
@@ -312,8 +297,13 @@
         const data = await res.json();
 
         if (data.error) {
-            alert(data.error);
-            window.location.href = "/login"
+            alert(data.error)
+            if(data.statusCode===401){
+               window.location.href="/login"
+                
+            }
+        
+           
         }
 
         console.log(data.feed, "user feed")
@@ -335,16 +325,16 @@
             let feedDiv = document.createElement("div")
             let feedContent = `<article class="p-4 border-b border-gray-800 hover:bg-white/5 transition cursor-pointer">
                 <div class="flex gap-3">
-                   <a href="/profile/${data.feed[i].username}"> <img src="${data.feed[i].profile_photo_url}" class="w-10 h-10 rounded-full bg-gray-700"></a>
+                   <a href="/profile/${tweet.username}"> <img src="${tweet.profile_photo_url}" class="w-10 h-10 rounded-full bg-gray-700"></a>
                     <div class="flex-1">
                         <div class="flex items-center gap-1">
-                            <a href="/profile/${data.feed[i].username}"><span class="font-bold hover:underline">${data.feed[i].username}</span></a>
+                            <a href="/profile/${tweet.username}"><span class="font-bold hover:underline">${tweet.username}</span></a>
                          <span class="text-gray-500">
-  @${data.feed[i].username} · ${timeAgo(data.feed[i].created_at)}
+  @${tweet.username} · ${timeAgo(tweet.created_at)}
 </span>
                         </div>
-                        <a href="/tweet/${data.feed[i].tweet_id}">
-                        <p class="mt-1 mb-3">${data.feed[i].tweet_content}</p>
+                        <a href="/tweet/${tweet.tweet_id}">
+                        <p class="mt-1 mb-3">${tweet.tweet_content}</p>
                         <div class="rounded-2xl border border-gray-800 overflow-hidden">
                             <div class="rounded-2xl border border-gray-800 overflow-hidden flex flex-col">
                         ${mediaHtml}
@@ -353,10 +343,10 @@
                        
                         <!-- Post Actions -->
                         <div class="flex justify-between mt-4 text-gray-500 max-w-md">
-                            <div class="flex items-center gap-2 group"><span onclick="replyToTweet(${tweet.tweet_id})" class="p-2 rounded-full group-hover:bg-blue-500/10 group-hover:text-blue-500">💬</span> ${data.feed[i].reply_count}</div>
+                            <div class="flex items-center gap-2 group"><span onclick="replyToTweet(${tweet.tweet_id})" class="p-2 rounded-full group-hover:bg-blue-500/10 group-hover:text-blue-500">💬</span> ${tweet.reply_count}</div>
                              </a>
-                            <div data-retweet-action="${tweet.tweet_id}" class="flex items-center gap-2 group"><span onclick="retweet(event, ${tweet.tweet_id})" class="p-2 rounded-full group-hover:bg-green-500/10 group-hover:text-green-500">🔁</span> <span data-retweet-count="${tweet.tweet_id}">${data.feed[i].retweet_count}</span></div>
-                            <div data-like-action="${tweet.tweet_id}" class="flex items-center gap-2 group ${likeColorClass}" style="${isLiked ? 'color:#ec4899;' : ''}"><span onclick="likeTweet(event, ${tweet.tweet_id})" data-like-button="${tweet.tweet_id}" class="p-2 rounded-full cursor-pointer group-hover:bg-pink-500/10 group-hover:text-pink-500" style="${isLiked ? 'color:#ec4899;' : ''}">❤️</span> <span data-like-count="${tweet.tweet_id}" style="${isLiked ? 'color:#ec4899;' : ''}">${data.feed[i].like_count}</span></div>
+                            <div data-retweet-action="${tweet.tweet_id}" class="flex items-center gap-2 group"><span onclick="retweet(event, ${tweet.tweet_id})" class="p-2 rounded-full group-hover:bg-green-500/10 group-hover:text-green-500">🔁</span> <span data-retweet-count="${tweet.tweet_id}">${tweet.retweet_count}</span></div>
+                            <div data-like-action="${tweet.tweet_id}" class="flex items-center gap-2 group ${likeColorClass}" style="${isLiked ? 'color:#ec4899;' : ''}"><span onclick="likeTweet(event, ${tweet.tweet_id})" data-like-button="${tweet.tweet_id}" class="p-2 rounded-full cursor-pointer group-hover:bg-pink-500/10 group-hover:text-pink-500" style="${isLiked ? 'color:#ec4899;' : ''}">❤️</span> <span data-like-count="${tweet.tweet_id}" style="${isLiked ? 'color:#ec4899;' : ''}">${tweet.like_count}</span></div>
                             <div class="flex items-center gap-2 group"><span class="p-2 rounded-full group-hover:bg-blue-500/10 group-hover:text-blue-500">📊</span> 418k</div>
                         </div>
                     </div>
@@ -437,38 +427,8 @@
     [modalClose, modalCancel].forEach(b => { if (b) b.addEventListener('click', closeModal); });
     modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
-    modalFile.addEventListener('change', (e) => {
-        const f = e.target.files[0];
-        fileName.textContent = f ? `${f.name} • ${Math.round(f.size / 1024)} KB` : '';
-        filePreview.innerHTML = '';
-        if (!f) return;
-        if (f.type.startsWith('image/')) {
-            const img = document.createElement('img');
-            img.src = URL.createObjectURL(f);
-            img.className = 'max-h-48 rounded mt-2';
-            img.onload = () => URL.revokeObjectURL(img.src);
-            filePreview.appendChild(img);
-        } else if (f.type.startsWith('video/')) {
-            const vid = document.createElement('video');
-            vid.src = URL.createObjectURL(f);
-            vid.controls = true;
-            vid.className = 'max-h-48 rounded mt-2';
-            filePreview.appendChild(vid);
-        } else {
-            const p = document.createElement('p');
-            p.textContent = 'Preview not available for this file type.';
-            filePreview.appendChild(p);
-        }
-    });
 
 
-    //   addPostToFeed({text, file});
-    // TODO: upload file + send to server
-
-
-
-    // 2. Append your data
-    // 'tweetImage' and 'content' are the keys your backend will 
     const postBtn = document.getElementById("modal-submit")
     postBtn.addEventListener("click", createTweet)
 
@@ -477,7 +437,7 @@
         const postForm = document.getElementById("postForm");
         const formData = new FormData(postForm);
 
-        // LOGGING: Use this to verify data is there (files won't show in regular console.log)
+      
         for (let pair of formData.entries()) {
             console.log(pair[0] + ': ' + pair[1]);
         }
@@ -493,19 +453,13 @@
         });
 
         const data = await res.json();
+
+        if(data.error){
+            alert(data.error);
+        }
         console.log(data, "tweet created data");
+        closeModal()
     }
-
-
-
-
-    // Allow quick post from inline input (without file)
-    inlinePost.addEventListener('click', () => {
-        const text = (inlineText.value || '').trim();
-        if (!text) return;
-        addPostToFeed({ text, file: null });
-        inlineText.value = '';
-    });
 
 
     async function getAllUsers() {
@@ -625,13 +579,61 @@
 
 
 
+    //search functionality
+    //currently i am just searching users not tweets!!!!
+    const searchInputBox = document.getElementById("search-input");
 
+    searchInputBox.addEventListener("input",globalSearch)
 
-    let subscribeBtn = document.getElementById("subscribeBtn")
+    async function globalSearch(){
 
-    subscribeBtn.addEventListener("click", () => {
-        alert("lawde tera ghar jainga isme!!!")
-    })
+        const searchInputValue = searchInputBox.value;
+
+        const res = await fetch(`/api/user/search?search=${searchInputValue}`,{
+            method:"GET",
+            headers:{
+                authorization:`Bearer ${localStorage.getItem('accessToken')}`,
+            }
+        })
+
+        const data = await res.json();
+
+        console.log(data,"search data")
+
+        const suggestion = document.getElementById("follow-suggestion");
+
+                
+        while (suggestion.firstChild) {
+            suggestion.removeChild(suggestion.firstChild);
+        }
+
+        let searchResults = data.searchResults
+
+        for (let i = 0; i < searchResults.length; i++) {
+            let isFollowed = Boolean(Number(searchResults[i].is_followed));
+            isFollowed = true; //currently hardcoded!!
+            let suggestedDiv = document.createElement("div")
+            const suggestedUser = `
+              <div class="mt-auto mb-4 flex items-center gap-3 p-3 rounded-full hover:bg-white/10 cursor-pointer">
+          <a href="/profile/${searchResults[i].username}">
+          
+            <img src="${searchResults[i].profile_photo_url}" class="w-10 h-10 rounded-full bg-gray-700">
+            <div class="hidden xl:block">
+                <p class="font-bold text-[15px]">${searchResults[i].username}</p>
+                <p class="text-gray-500 text-[15px]">@${searchResults[i].username}</p>
+            </div>
+            </a>
+            <div class="ml-auto hidden xl:block"><button type="button" id="follow-btn-${i}" onclick="followUnfollow('${searchResults[i].username}',${i})">${isFollowed ? "unfollow" : "follow"}</button></div>
+        </div>
+         
+        `
+            suggestedDiv.innerHTML = suggestedUser
+            suggestion.append(suggestedDiv)
+
+        }
+
+    }
+
 
 </script>
 

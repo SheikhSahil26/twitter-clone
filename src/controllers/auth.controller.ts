@@ -49,13 +49,14 @@ export class AuthControllers {
                 });
             }
 
-            const refreshToken = response.data.refreshToken
+            const refreshToken = response.data.refreshToken 
+            console.log(refreshToken,"this is refresh token!!")
 
             res.cookie("refreshToken",refreshToken,{
                 httpOnly:true,
                 secure:false,
                 sameSite:"lax",
-                maxAge : 50*1000,
+                maxAge : 60*1000,
             })
 
 
@@ -232,17 +233,19 @@ export class AuthControllers {
 
             if (!refreshToken) {
                 return res.status(401).json({
-                    error: "no refresh token"
+                    error: "no refresh token",
+                    statusCode : 401
                 })
             }
             console.log("before decoded")
             const decoded: any = jwt.verify(refreshToken, JWT_SECRET_KEY);
 
-            console.log(decoded, "decoed from refresh token asdfas");
+            console.log(decoded, "decoed from refresh token");
 
             if (!decoded) {
                 return res.status(401).json({
-                    error: "refresh token expired login again!!"
+                    error: "refresh token expired login again!!",
+                    statusCode : 401
                 })
             }
 
@@ -250,7 +253,7 @@ export class AuthControllers {
                 expiresIn: "10s"
             })
 
-            console.log(newAccessToken, "this is nw")
+            console.log(newAccessToken, "this is new access token")
 
             return res.json({ accessToken: newAccessToken })
 

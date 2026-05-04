@@ -172,7 +172,7 @@ export class UserService {
             return {
                 success: false,
                 message: err.message,
-                statusCode: 500,
+                statusCode: 400,
             }
         }
 
@@ -244,6 +244,27 @@ export class UserService {
             }
         }
         
+    }
+
+    async searchUsers(searchQuery : string){
+        try{
+            const outputUsers : any = await UserRepository.searchUsers(searchQuery);
+
+            return {
+                success:true,
+                message:"this are searched users",
+                data:outputUsers,
+                statusCode:200
+            }
+
+        }
+        catch(err:any){
+            return {
+                success:false,
+                message:err.message,
+                statusCode:400,
+            }
+        }
     }
 
 

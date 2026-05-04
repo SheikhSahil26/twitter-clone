@@ -83,6 +83,12 @@
                         class="text-[#1d9bf0]"></span>
                 </div>
 
+
+                <div id="timezone" class="mt-3 text-[15px] leading-normal">
+                    <span
+                        class="text-[#1d9bf0]"></span>
+                </div>
+
                 <div  class="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-[#71767b] text-[15px]">
                     <span id="joined" class="flex items-center gap-1">
                         <svg viewBox="0 0 24 24" class="h-4 w-4 fill-current">
@@ -90,7 +96,7 @@
                                 d="M7 4V3h2v1h6V3h2v1h1.5C19.88 4 21 5.12 21 6.5v12c0 1.38-1.12 2.5-2.5 2.5h-13C4.12 21 3 19.88 3 18.5v-12C3 5.12 4.12 4 5.5 4H7zm0 2H5.5c-.28 0-.5.22-.5.5v12c0 .28.22.5.5.5h13c.28 0 .5-.22.5-.5v-12c0-.28-.22-.5-.5-.5H17v1h-2V6H9v1H7V6z">
                             </path>
                         </svg>
-                        Joined October 2023
+                        
                     </span>
                 </div>
 
@@ -212,6 +218,17 @@
 
 <script>
 
+      function timeAgo(utcTime) {
+    const now = new Date();
+    const past = new Date(utcTime);
+    const diff = Math.floor((now - past) / 1000);
+
+    if (diff < 60) return "Just now";
+    if (diff < 3600) return Math.floor(diff / 60) + "m";
+    if (diff < 86400) return Math.floor(diff / 3600) + "h";
+    return Math.floor(diff / 86400) + "d";
+  }
+
     let username=""
     let ownProfileTweetsData = {
         userOriginalTweets: [],
@@ -240,6 +257,7 @@
         const bannerImage = document.getElementById("banner-image");
         const usernameBody = document.getElementById("username")
         const uname = document.getElementById("uname")
+        const timezone=document.getElementById("timezone")
         profileImage.src = `${data.profileData.profile_photo_url}`;
         bannerImage.src = `${data.profileData.cover_image_url}`;
 
@@ -248,7 +266,7 @@
         // followings.innerText = data.profileData.followings
 
         joined.innerText = data.profileData.created_at
-
+        timezone.innerText = data.profileData.timezone
         username.innerText = data.profileData.username
 
         username = data.profileData.username
@@ -438,6 +456,9 @@ async function editProfile() {
                     <div class="flex items-center gap-1">
                         <a href="/profile/${tweet.username}"><span class="font-bold hover:underline">${tweet.username}</span></a>
                         <span class="text-gray-500">@${tweet.username}· 6h</span>
+                        <span class="text-gray-500">
+  @${tweet.username} · ${timeAgo(tweet.created_at)}
+</span>
                     </div>
                     <a href="/tweet/${tweet.tweet_id}">
                     <p class="mt-1 mb-3">${tweet.tweet_content}</p>

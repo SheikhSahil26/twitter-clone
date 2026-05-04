@@ -13,10 +13,10 @@ router.post("/signup",validate(UserSchema),authControllers.signUp)
 router.post("/login",authControllers.login)
 router.post("/forgot-password",authControllers.forgotPassword)
 router.post("/verify-otp",authControllers.verifyOtp);
-router.post("/reset-password",authControllers.resetPassword);
-router.post("/refresh-token",authControllers.refreshToken)
-router.post("/logout",authControllers.logout)
-router.get("/get-otp/:token",authControllers.getOtp)
+router.get("/reset-password",authControllers.resetPassword);
+router.post("/refresh-token",authControllers.refreshToken);
+router.post("/logout",authControllers.logout);
+router.get("/get-otp/:token",authControllers.getOtp);
 router.get("/verify-token/:token",authControllers.verifyToken)
 // router.get('/login/federated/google', passport.authenticate('google'));
 

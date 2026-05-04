@@ -275,5 +275,30 @@ ORDER BY t.created_at DESC;`, [viewerId,userId]
     }
   }
 
+  static async searchUsers(searchQuery:string):Promise<User[]>{
+    try{
+
+     const formattedSearch = `%${searchQuery}%`;
+
+const [query] = await db.execute<RowDataPacket[]>(
+  `SELECT username, profile_photo_url, f_name, l_name 
+   FROM users 
+   WHERE username LIKE ? 
+      OR f_name LIKE ? 
+      OR l_name LIKE ?`,
+  [formattedSearch, formattedSearch, formattedSearch]
+);
+
+      console.log(query,"this is search query!!!!")
+
+      return query as User[];
+
+
+
+    }catch(err){
+      console.log(err)
+      throw new Error("DB_ERROR_WHILE_SEARCHING")
+    }
+  }
 
 }

@@ -91,13 +91,14 @@ export class TweetControllers {
              const userId = (req as any).user.payload.id
         const resp :any = await tweetService.likeUnlikeTweet(tweetId,userId)
 
-        console.log(resp.data)
+        console.log(resp.data,"liked data")
         console.log("reached like contorller")
         if(!resp.success){
             return res.status(resp.statusCode).json({
                 error:resp.message,
             })
         }
+        
 
         return res.status(resp.statusCode).json({
             message:resp.message,

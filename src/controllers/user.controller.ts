@@ -233,6 +233,7 @@ export class UserControllers {
             if (!resp.success) {
                 return res.status(resp.statusCode).json({
                     error: resp.message,
+                    statusCode : resp.statusCode
                 })
             }
             console.log(resp.data, "resp data ion contorller")
@@ -260,11 +261,13 @@ export class UserControllers {
             return res.status(resp.statusCode).json({
                 message: resp.message,
                 feed: finalData,
+                statusCode : resp.statusCode
             })
 
         } catch (err) {
             return res.status(500).json({
                 error: "internal server error",
+                statusCode : 500
             })
         }
 
@@ -409,6 +412,31 @@ export class UserControllers {
         }catch(err){
             return res.status(500).json({
                 error:"internal server error"
+            })
+        }
+    }
+
+    async searchUsers(req:Request,res:Response){
+        try{
+            const searchQuery = (req.query.search as string)??""; //if undefined then empty string
+            console.log(searchQuery,"search query")
+            const resp = await userService.searchUsers(searchQuery);
+
+            if(!resp.success){
+                return res.status(resp.statusCode).json({
+                    error:resp.message
+                })
+            }
+
+            return res.status(resp.statusCode).json({
+                searchResults:resp.data,
+            })
+
+
+
+        }catch(err){
+            return res.status(500).json({
+                error:"Internal Server Error"
             })
         }
     }

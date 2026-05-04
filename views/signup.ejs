@@ -71,6 +71,9 @@
 
 
     <script>
+          if(localStorage.getItem("accessToken")){
+      window.location.href = "/feed";
+  }
 
   const form = document.getElementById("signupForm")
 
